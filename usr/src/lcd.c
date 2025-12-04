@@ -209,6 +209,10 @@ vu16 lid=0x1234;
 // Not been tested on other types of driver chip!
 void LCD_Init(void) {
 
+    HAL_GPIO_WritePin(LCDRST_GPIO_Port, LCDRST_Pin, GPIO_PIN_RESET);
+    delay_ms(50);
+    HAL_GPIO_WritePin(LCDRST_GPIO_Port, LCDRST_Pin, GPIO_PIN_SET);
+
     delay_ms(50);
     LCD_WriteReg(0x0000, 0x0001);
     delay_ms(50);

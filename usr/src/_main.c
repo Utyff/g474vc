@@ -38,6 +38,8 @@ void mainInitialize() {
 //    FPUCheck();
 }
 
+static u16 color = 1;
+
 void mainCycle() {
 //    drawScreen();
 //    KEYS_scan();
@@ -61,6 +63,20 @@ void mainCycle() {
 //    LCD_ShowxNum(90, 214, (u32) time / 10, 5, 12, 0x01);
 //    LCD_ShowxNum(120, 214, (u32) firstHalf, 5, 12, 0x01);
 
+    u32 t0 = DWT_Get_Current_Tick();
+    LCD_Clear(color);
+    u32 ticks = DWT_Elapsed_Tick(t0);
+    POINT_COLOR = YELLOW;
+    LCD_ShowxNum(130, 227, ticks / DWT_IN_MICROSEC, 8, 12, 9);
+//    t00 = t0;
+//    ticks0 = ticks;
+
+    color = color << 1;
+    if (color == 0) {
+        color = 1;
+    }
+    POINT_COLOR = BLACK;
+    LCD_ShowxNum(0, 214, color, 10, 12, 0x0);
     delay_ms(50);
 }
 
