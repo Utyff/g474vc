@@ -47,7 +47,7 @@ add_compile_options($<$<COMPILE_LANGUAGE:ASM>:-x$<SEMICOLON>assembler-with-cpp>)
 #else ()
     message(STATUS "Minimal optimization, debug info included")
 #    add_compile_options(-Og -g)
-    add_compile_options(-O0 -g)
+    add_compile_options(-Og -g)
 #endif ()
 
 include_directories(usr/inc Core/Inc Drivers/STM32G4xx_HAL_Driver/Inc Drivers/STM32G4xx_HAL_Driver/Inc/Legacy Drivers/CMSIS/Device/ST/STM32G4xx/Include Drivers/CMSIS/Include)

@@ -77,7 +77,7 @@ void mainCycle() {
     }
     POINT_COLOR = BLACK;
     LCD_ShowxNum(0, 214, color, 10, 12, 0x0);
-    delay_ms(50);
+    delay_ms(300);
 }
 
 #ifdef DEBUG_TRACE_SWO

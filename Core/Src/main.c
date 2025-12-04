@@ -454,11 +454,11 @@ static void MX_FMC_Init(void)
   hsram1.Init.PageSize = FMC_PAGE_SIZE_NONE;
   hsram1.Init.MaxChipSelectPulse = DISABLE;
   /* Timing */
-  Timing.AddressSetupTime = 5;
+  Timing.AddressSetupTime = 3;
   Timing.AddressHoldTime = 15;
-  Timing.DataSetupTime = 4;
+  Timing.DataSetupTime = 2;
   Timing.DataHoldTime = 0;
-  Timing.BusTurnAroundDuration = 3;
+  Timing.BusTurnAroundDuration = 1;
   Timing.CLKDivision = 16;
   Timing.DataLatency = 17;
   Timing.AccessMode = FMC_ACCESS_MODE_A;
