@@ -16,7 +16,6 @@ void CORECheck();
 
 void FPUCheck();
 
-extern int ii;
 extern float time;
 
 const char buildDate[] = __DATE__;
@@ -64,12 +63,13 @@ void mainCycle() {
     BACK_COLOR = CLR_BACKGROUND;
     LCD_ShowxNum(0, LINE1_Y, TIM8->CNT, 5, 12, 0x0);
     LCD_ShowxNum(30, LINE1_Y, (u32) button1Count, 5, 12, 0x0);
-//    LCD_ShowxNum(60, 214, (u32) ii, 5, 12, 0x01);
-//    LCD_ShowxNum(90, 214, (u32) time / 10, 5, 12, 0x01);
-//    LCD_ShowxNum(120, 214, (u32) firstHalf, 5, 12, 0x01);
+    LCD_ShowxNum(60, LINE1_Y, currentAdcParam, 5, 12, 0x0);
+//    LCD_ShowxNum(90, LINE1_Y, (u32) time / 10, 5, 12, 0x0);
+//    LCD_ShowxNum(120, LINE1_Y, (u32) firstHalf, 5, 12, 0x0);
 
     POINT_COLOR = MAGENTA;
     LCD_ShowxNum(0,  LINE2_Y, ADCElapsedTick, 10, 12, 0x0);
+    LCD_ShowxNum(100,  LINE2_Y, tim1Freq, 10, 12, 0x0);
 
     if (adc1cplt != 0) {
         adc1cplt = 0;

@@ -44,10 +44,11 @@ void DAC_startSin() {
     for(int i=0; i<32; i++) {
         sin32_2[i] = (sin32[i]>>4);
     }
-    HAL_TIM_PWM_Start(&htim4, TIM_CHANNEL_1);
+    HAL_TIM_PWM_Stop(&htim4, TIM_CHANNEL_1);
 
     /*##-2- Enable DAC selected channel and associated DMA #############################*/
     if (HAL_DAC_Start_DMA(&hdac1, DAC_CHANNEL_1, (uint32_t *)sin32_2, 32, DAC_ALIGN_8B_R) != HAL_OK) {
         Error_Handler();
     }
+    HAL_TIM_PWM_Start(&htim4, TIM_CHANNEL_1);
 }

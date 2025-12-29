@@ -4,22 +4,33 @@
 #include <DataBuffer.h>
 #include "adc.h"
 
-// max ADC clock = ??mHz; Recommended ADC clock = ??mHz
+// max ADC clock = ??mHz; Recommended ADC clock = 60mHz
 struct ADC_param {
     uint32_t ADC_Prescaler;
     uint32_t ADC_SampleTime;
     float SampleTime;    // microseconds
-    float ScreenTime;    // microseconds
 };
 typedef struct ADC_param ADC_PARAM;
 
-#define ADC_Parameters_Size  3
-const ADC_PARAM ADC_Parameters[ADC_Parameters_Size] = {
-        {ADC_CLOCK_ASYNC_DIV4, ADC_SAMPLETIME_2CYCLES_5,  0.f,  0.f},
-        {ADC_CLOCK_ASYNC_DIV4, ADC_SAMPLETIME_3CYCLES_5,  0.f,  0.f},
-        {ADC_CLOCK_ASYNC_DIV4, ADC_SAMPLETIME_6CYCLES_5,  0.f,  0.f} };
+uint32_t currentAdcParam = 0;
 
-uint32_t ADC_Prescaler = ADC_CLOCK_ASYNC_DIV4;
+#define ADC_Parameters_Size  8
+const ADC_PARAM ADC_Parameters[ADC_Parameters_Size] = {
+        {ADC_CLOCK_ASYNC_DIV1, ADC_SAMPLETIME_2CYCLES_5,  0.f},
+        {ADC_CLOCK_ASYNC_DIV1, ADC_SAMPLETIME_3CYCLES_5,  0.f},
+//        {ADC_CLOCK_ASYNC_DIV1, ADC_SAMPLETIME_6CYCLES_5,  0.f},
+        {ADC_CLOCK_ASYNC_DIV2, ADC_SAMPLETIME_2CYCLES_5,  0.f},
+        {ADC_CLOCK_ASYNC_DIV2, ADC_SAMPLETIME_3CYCLES_5,  0.f},
+//        {ADC_CLOCK_ASYNC_DIV2, ADC_SAMPLETIME_6CYCLES_5,  0.f},
+        {ADC_CLOCK_ASYNC_DIV4, ADC_SAMPLETIME_2CYCLES_5,  0.f},
+        {ADC_CLOCK_ASYNC_DIV4, ADC_SAMPLETIME_3CYCLES_5,  0.f},
+//        {ADC_CLOCK_ASYNC_DIV4, ADC_SAMPLETIME_6CYCLES_5,  0.f}
+        {ADC_CLOCK_ASYNC_DIV6, ADC_SAMPLETIME_2CYCLES_5,  0.f},
+        {ADC_CLOCK_ASYNC_DIV6, ADC_SAMPLETIME_3CYCLES_5,  0.f},
+//        {ADC_CLOCK_ASYNC_DIV4, ADC_SAMPLETIME_6CYCLES_5,  0.f}
+};
+
+uint32_t ADC_Prescaler = ADC_CLOCK_ASYNC_DIV1;
 uint32_t ADC_SampleTime = ADC_SAMPLETIME_2CYCLES_5;
 
 uint16_t ScreenTime = 0;      // index in ScreenTimes
@@ -35,6 +46,14 @@ uint32_t ADCElapsedTick;       // the last time buffer fill
  */
 HAL_StatusTypeDef adc_err=0;
 void ADC_start() {
+    ADC_Prescaler = ADC_Parameters[currentAdcParam].ADC_Prescaler;
+    ADC_SampleTime = ADC_Parameters[currentAdcParam].ADC_SampleTime;
+
+    adc_err = HAL_ADC_Stop_DMA(&hadc1);
+//    adc_err = HAL_ADCEx_MultiModeStart_DMA(&hadc1, (uint32_t *) samplesBuffer, BUF_SIZE / 2);
+    if (adc_err != HAL_OK) {
+        Error_Handler();
+    }
 
     ADC_ChannelConfTypeDef sConfig;
 
@@ -141,9 +160,18 @@ float ADC_getTime() {
 
 s16 sStep;
 float time;
-int ii = 0;
 
 void ADC_step(int16_t step) {
+    if (step == 0) return;
+    if (step > 0) {
+        if (++currentAdcParam >= ADC_Parameters_Size) currentAdcParam = ADC_Parameters_Size - 1;
+    } else {
+        if (currentAdcParam-- == 0) currentAdcParam = 0;
+    }
+//    ADC_Prescaler = ADC_Parameters[currentAdcParam].ADC_Prescaler;
+//    ADC_SampleTime = ADC_Parameters[currentAdcParam].ADC_SampleTime;
+    return;
+
 /*    if (step == 0) return;
     if (step > 0) ADC_step_up();
     else ADC_step_down();
@@ -159,7 +187,7 @@ void ADC_step(int16_t step) {
     }
 
     i--;
-    ii = i;
+    currentAdcParam = i;
     ADC_Prescaler = ADC_Parameters[i].ADC_Prescaler;
     ADC_SampleTime = ADC_Parameters[i].ADC_SampleTime;
 
