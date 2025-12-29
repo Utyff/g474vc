@@ -15,9 +15,9 @@ typedef struct ADC_param ADC_PARAM;
 
 #define ADC_Parameters_Size  3
 const ADC_PARAM ADC_Parameters[ADC_Parameters_Size] = {
-        {ADC_CLOCK_ASYNC_DIV4, ADC_SAMPLETIME_2CYCLES_5,  0.,  0.f},
-        {ADC_CLOCK_ASYNC_DIV4, ADC_SAMPLETIME_3CYCLES_5,  0.,  0.f},
-        {ADC_CLOCK_ASYNC_DIV4, ADC_SAMPLETIME_6CYCLES_5,  0.,  0.f} };
+        {ADC_CLOCK_ASYNC_DIV4, ADC_SAMPLETIME_2CYCLES_5,  0.f,  0.f},
+        {ADC_CLOCK_ASYNC_DIV4, ADC_SAMPLETIME_3CYCLES_5,  0.f,  0.f},
+        {ADC_CLOCK_ASYNC_DIV4, ADC_SAMPLETIME_6CYCLES_5,  0.f,  0.f} };
 
 uint32_t ADC_Prescaler = ADC_CLOCK_ASYNC_DIV4;
 uint32_t ADC_SampleTime = ADC_SAMPLETIME_2CYCLES_5;

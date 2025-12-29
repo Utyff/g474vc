@@ -1,19 +1,6 @@
 #ifndef MY_MAIN_H
 #define MY_MAIN_H
 
-#ifdef STM32F303xC
-#include "stm32f3xx_hal.h"
-#endif
-#ifdef STM32F407xx
-#include "stm32f4xx_hal.h"
-#endif
-#if defined (STM32F765xx) || defined(STM32F746xx)
-#include "stm32f7xx_hal.h"
-#endif
-#if defined(STM32H743xx) ||  defined(STM32H750xx)
-#include "stm32h7xx_hal.h"
-#endif
-
 #include "main.h"
 
 typedef int32_t s32;

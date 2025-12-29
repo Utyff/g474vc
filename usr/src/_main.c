@@ -44,9 +44,8 @@ void mainInitialize() {
     adc1cplt = 0;
     ADC_start();
 
-    HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_1);
-//    GEN_setParams();
-//    DAC_startSin();
+    GEN_setParams();
+    DAC_startSin();
 
     HAL_TIM_Encoder_Start(&htim8, TIM_CHANNEL_1);
 }
