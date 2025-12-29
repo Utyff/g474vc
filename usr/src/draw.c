@@ -6,9 +6,10 @@
 void drawFrame() {
     u16 x, y, step = 32;
 
-    LCD_Clear(BLACK);
+//    LCD_Clear(BLACK);
+    eraseGraph();
     POINT_COLOR = GRAY;  // Drawing pen color
-    BACK_COLOR = BLACK;
+    BACK_COLOR = CLR_BACKGROUND;
 
     u32 t0 = DWT_Get_Current_Tick();
 
@@ -24,12 +25,12 @@ void drawFrame() {
         LCD_Fill(x, 0, x, MAX_Y-1, POINT_COLOR);
     }
 
-    LCD_Set_Window(0,0,MAX_X-1,MAX_Y-1);
+    LCD_Set_Window(0, 0, MAX_X - 1, MAX_Y - 1);
 
     // count time for one circle
     u32 ticks = DWT_Elapsed_Tick(t0);
     POINT_COLOR = YELLOW;
-    LCD_ShowxNum(130, 227, ticks / 168, 8, 12, 9);
+    LCD_ShowxNum(110, LINE1_Y, ticks / DWT_IN_MICROSEC, 8, 12, 0);
 }
 
 void drawScreen() {
@@ -42,5 +43,5 @@ void drawScreen() {
     // count time for one circle
     u32 ticks = DWT_Elapsed_Tick(t0);
     POINT_COLOR = YELLOW;
-    LCD_ShowxNum(170, 227, ticks / 168, 8, 12, 9);
+    LCD_ShowxNum(170, LINE1_Y, ticks / DWT_IN_MICROSEC, 8, 12, 0);
 }

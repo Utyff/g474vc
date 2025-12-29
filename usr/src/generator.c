@@ -19,7 +19,7 @@
 struct GEN_param {
     uint32_t TIM_Prescaler;
     uint32_t TIM_Period;
-    int Frequency;    // Hz
+    uint32_t Frequency;    // Hz
 };
 typedef struct GEN_param GEN_PARAM;
 
@@ -33,52 +33,29 @@ const GEN_PARAM GEN_Parameters[GEN_Parameters_Size] = {
         {107, 199, 10000}
 };
 
-int currentGenParam = 4;
-int currentGenScale = 1;
+uint32_t currentGenParam = 4;
 
 uint32_t tim1Prescaler = 107;
 uint32_t tim1Period = 99;
 uint32_t tim1Pulse = 30;
+uint32_t tim1Freq = 0;
 
 void GEN_step(int16_t step) {
     char msg[200];
 
     if (step == 0) return;
 
-    if (step > 0) currentGenParam--;
-    else currentGenParam++;
-
-    // up Freq
-    if (currentGenParam < 0) {
-        currentGenParam += 5;
-        currentGenScale /= 10;
-        if (currentGenScale < 1) {
-            currentGenParam = 0;
-            currentGenScale = 1;
-        }
+    if (step > 0) {
+        if (currentGenParam > 0) currentGenParam--;
+    } else {
+        if (currentGenParam < GEN_Parameters_Size-1) currentGenParam++;
     }
 
-    // down Freq
-    if (currentGenParam > 4) {
-        currentGenParam -= 5;
-        currentGenScale *= 10;
-        if (currentGenScale > 100) {
-            currentGenParam = 4;
-            currentGenScale = 100;
-        }
-    }
-
-    tim1Prescaler = GEN_Parameters[currentGenParam].TIM_Prescaler;
-    tim1Period = GEN_Parameters[currentGenParam].TIM_Period * currentGenScale;
-    tim1Pulse = tim1Period * 30 / 100;
     GEN_setParams();
 
-    sprintf(msg, "After step. param: %u, scale: %u, presc: %u, period: %u\n", currentGenParam, currentGenScale, tim1Prescaler, tim1Period);
+    sprintf(msg, "After step. param: %u, presc: %u, period: %u freq: %u\n",
+            currentGenParam, tim1Prescaler, tim1Period, tim1Freq);
     DBG_Trace(msg);
-}
-
-void GEN_setFreq() {
-    GEN_setParams();
 }
 
 /**
@@ -86,6 +63,11 @@ void GEN_setFreq() {
  *
  */
 void GEN_setParams() {
+    tim1Prescaler = GEN_Parameters[currentGenParam].TIM_Prescaler;
+    tim1Period = GEN_Parameters[currentGenParam].TIM_Period;
+    tim1Freq = GEN_Parameters[currentGenParam].Frequency;
+    tim1Pulse = tim1Period * 40 / 100;
+
     TIM_OC_InitTypeDef sConfigOC;
 
     htim1.Instance = TIM1;
@@ -94,7 +76,7 @@ void GEN_setParams() {
     htim1.Init.Period = tim1Period;
     htim1.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
     htim1.Init.RepetitionCounter = 0;
-    htim1.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_ENABLE;
+    htim1.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
     if (HAL_TIM_Base_Init(&htim1) != HAL_OK)
         Error_Handler();
 

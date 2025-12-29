@@ -4,7 +4,7 @@
 #include <DataBuffer.h>
 #include "adc.h"
 
-
+// max ADC clock = ??mHz; Recommended ADC clock = ??mHz
 struct ADC_param {
     uint32_t ADC_Prescaler;
     uint32_t ADC_SampleTime;
@@ -13,42 +13,13 @@ struct ADC_param {
 };
 typedef struct ADC_param ADC_PARAM;
 
-#define ADC_Parameters_Size  3 // 31
+#define ADC_Parameters_Size  3
 const ADC_PARAM ADC_Parameters[ADC_Parameters_Size] = {
-        {ADC_CLOCK_ASYNC_DIV2, ADC_SAMPLETIME_2CYCLES_5,  0.4074074f,  130.37037f},
-        {ADC_CLOCK_ASYNC_DIV4, ADC_SAMPLETIME_6CYCLES_5,  0.4259259f,  136.29630f} };
-        /*
-        {ADC_CLOCK_SYNC_PCLK_DIV6, ADC_SAMPLETIME_3CYCLES,   0.6111111f,  195.55556f},
-        {ADC_CLOCK_SYNC_PCLK_DIV2, ADC_SAMPLETIME_28CYCLES,  0.6666667f,  213.33333f},
-        {ADC_CLOCK_SYNC_PCLK_DIV8, ADC_SAMPLETIME_3CYCLES,   0.8148148f,  260.74074f},
-        {ADC_CLOCK_SYNC_PCLK_DIV4, ADC_SAMPLETIME_15CYCLES,  0.8518519f,  272.59259f},
-        {ADC_CLOCK_SYNC_PCLK_DIV2, ADC_SAMPLETIME_56CYCLES,  1.1851852f,  379.25926f},
-        {ADC_CLOCK_SYNC_PCLK_DIV6, ADC_SAMPLETIME_15CYCLES,  1.2777778f,  408.88889f},
-        {ADC_CLOCK_SYNC_PCLK_DIV4, ADC_SAMPLETIME_28CYCLES,  1.3333333f,  426.66667f},
-        {ADC_CLOCK_SYNC_PCLK_DIV2, ADC_SAMPLETIME_84CYCLES,  1.7037037f,  545.18519f},
-        {ADC_CLOCK_SYNC_PCLK_DIV6, ADC_SAMPLETIME_28CYCLES,  2.0000000f,  640.00000f},
-        {ADC_CLOCK_SYNC_PCLK_DIV2, ADC_SAMPLETIME_112CYCLES, 2.2222222f,  711.11111f},
-        {ADC_CLOCK_SYNC_PCLK_DIV4, ADC_SAMPLETIME_56CYCLES,  2.3703704f,  758.51852f},
-        {ADC_CLOCK_SYNC_PCLK_DIV8, ADC_SAMPLETIME_28CYCLES,  2.6666667f,  853.33333f},
-        {ADC_CLOCK_SYNC_PCLK_DIV2, ADC_SAMPLETIME_144CYCLES, 2.8148148f,  900.74074f},
-        {ADC_CLOCK_SYNC_PCLK_DIV4, ADC_SAMPLETIME_84CYCLES,  3.4074074f,  1090.37037f},
-        {ADC_CLOCK_SYNC_PCLK_DIV6, ADC_SAMPLETIME_56CYCLES,  3.5555556f,  1137.77778f},
-        {ADC_CLOCK_SYNC_PCLK_DIV4, ADC_SAMPLETIME_112CYCLES, 4.4444444f,  1422.22222f},
-        {ADC_CLOCK_SYNC_PCLK_DIV8, ADC_SAMPLETIME_56CYCLES,  4.7407407f,  1517.03704f},
-        {ADC_CLOCK_SYNC_PCLK_DIV6, ADC_SAMPLETIME_84CYCLES,  5.1111111f,  1635.55556f},
-        {ADC_CLOCK_SYNC_PCLK_DIV4, ADC_SAMPLETIME_144CYCLES, 5.6296296f,  1801.48148f},
-        {ADC_CLOCK_SYNC_PCLK_DIV6, ADC_SAMPLETIME_112CYCLES, 6.6666667f,  2133.33333f},
-        {ADC_CLOCK_SYNC_PCLK_DIV8, ADC_SAMPLETIME_84CYCLES,  6.8148148f,  2180.74074f},
-        {ADC_CLOCK_SYNC_PCLK_DIV6, ADC_SAMPLETIME_144CYCLES, 8.4444444f,  2702.22222f},
-        {ADC_CLOCK_SYNC_PCLK_DIV8, ADC_SAMPLETIME_112CYCLES, 8.8888889f,  2844.44444f},
-        {ADC_CLOCK_SYNC_PCLK_DIV2, ADC_SAMPLETIME_480CYCLES, 9.0370370f,  2891.85185f},
-        {ADC_CLOCK_SYNC_PCLK_DIV8, ADC_SAMPLETIME_144CYCLES, 11.2592593f, 3602.96296f},
-        {ADC_CLOCK_SYNC_PCLK_DIV4, ADC_SAMPLETIME_480CYCLES, 18.0740741f, 5783.70370f},
-        {ADC_CLOCK_SYNC_PCLK_DIV6, ADC_SAMPLETIME_480CYCLES, 27.1111111f, 8675.55556f},
-        {ADC_CLOCK_SYNC_PCLK_DIV8, ADC_SAMPLETIME_480CYCLES, 36.1481481f, 11567.40741f}
-}; //*/
+        {ADC_CLOCK_ASYNC_DIV4, ADC_SAMPLETIME_2CYCLES_5,  0.,  0.f},
+        {ADC_CLOCK_ASYNC_DIV4, ADC_SAMPLETIME_3CYCLES_5,  0.,  0.f},
+        {ADC_CLOCK_ASYNC_DIV4, ADC_SAMPLETIME_6CYCLES_5,  0.,  0.f} };
 
-uint32_t ADC_Prescaler = ADC_CLOCK_ASYNC_DIV1;
+uint32_t ADC_Prescaler = ADC_CLOCK_ASYNC_DIV4;
 uint32_t ADC_SampleTime = ADC_SAMPLETIME_2CYCLES_5;
 
 uint16_t ScreenTime = 0;      // index in ScreenTimes
@@ -62,7 +33,8 @@ uint32_t ADCElapsedTick;       // the last time buffer fill
 /**
  * Copy of MX_ADC1_Init()
  */
-void ADC_setParams() {
+HAL_StatusTypeDef adc_err=0;
+void ADC_start() {
 
     ADC_ChannelConfTypeDef sConfig;
 
@@ -71,6 +43,8 @@ void ADC_setParams() {
     hadc1.Instance = ADC1;
     hadc1.Init.ClockPrescaler = ADC_Prescaler;
     hadc1.Init.Resolution = ADC_RESOLUTION_8B;
+    hadc1.Init.DataAlign = ADC_DATAALIGN_RIGHT;
+    hadc1.Init.GainCompensation = 0;
     hadc1.Init.ScanConvMode = ADC_SCAN_DISABLE;
     hadc1.Init.EOCSelection = ADC_EOC_SINGLE_CONV;
     hadc1.Init.LowPowerAutoWait = DISABLE;
@@ -80,10 +54,8 @@ void ADC_setParams() {
     hadc1.Init.NbrOfDiscConversion = 1;
     hadc1.Init.ExternalTrigConv = ADC_SOFTWARE_START;
     hadc1.Init.ExternalTrigConvEdge = ADC_EXTERNALTRIGCONVEDGE_NONE;
-//    hadc1.Init.ConversionDataManagement = ADC_CONVERSIONDATA_DMA_CIRCULAR;
-    hadc1.Init.Overrun = ADC_OVR_DATA_OVERWRITTEN;
-//    hadc1.Init.LeftBitShift = ADC_LEFTBITSHIFT_NONE;
-//    hadc1.Init.BoostMode = ENABLE;
+    hadc1.Init.DMAContinuousRequests = DISABLE;
+    hadc1.Init.Overrun = ADC_OVR_DATA_PRESERVED;
     hadc1.Init.OversamplingMode = DISABLE;
     if (HAL_ADC_Init(&hadc1) != HAL_OK) {
         Error_Handler();
@@ -91,9 +63,7 @@ void ADC_setParams() {
 
     /**Configure Regular Channel
     */
-    /**Configure Regular Channel
-    */
-    sConfig.Channel = ADC_CHANNEL_3;
+    sConfig.Channel = ADC_CHANNEL_1;
     sConfig.Rank = ADC_REGULAR_RANK_1;
     sConfig.SamplingTime = ADC_SampleTime;
     sConfig.SingleDiff = ADC_SINGLE_ENDED;
@@ -103,20 +73,25 @@ void ADC_setParams() {
         Error_Handler();
     }
 
-    HAL_ADC_Start_DMA(&hadc1, (uint32_t *) samplesBuffer, BUF_SIZE-4);
+    adc_err = HAL_ADC_Start_DMA(&hadc1, (uint32_t *) samplesBuffer, BUF_SIZE);
+//    adc_err = HAL_ADCEx_MultiModeStart_DMA(&hadc1, (uint32_t *) samplesBuffer, BUF_SIZE / 2);
+    if (adc_err != HAL_OK) {
+        Error_Handler();
+    }
 
     ADCStartTick = DWT_Get_Current_Tick();
 }
 
-uint32_t halfCount =0;
-uint32_t cpltCount =10;
+uint32_t halfCount = 0;
+uint32_t cpltCount = 0;
+
 /**
   * @brief  Conversion complete callback in non-blocking mode
   * @param  hadc: ADC handle
   * @retval None
   */
-void HAL_ADC_ConvHalfCpltCallback(ADC_HandleTypeDef* hadc)
-{
+void HAL_ADC_ConvHalfCpltCallback(ADC_HandleTypeDef *hadc) {
+    ADCHalfElapsedTick = DWT_Elapsed_Tick(ADCStartTick);
     halfCount++;
     firstHalf = 0;
     /* Invalidate Data Cache to get the updated content of the SRAM on the first half of the ADC converted data buffer: 32 bytes */
@@ -128,12 +103,16 @@ void HAL_ADC_ConvHalfCpltCallback(ADC_HandleTypeDef* hadc)
   * @param  hadc: ADC handle
   * @retval None
   */
-void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
-{
+void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef *hadc) {
+    ADCElapsedTick = DWT_Elapsed_Tick(ADCStartTick);
     cpltCount++;
-    firstHalf = 1;
+    adc1cplt = 1;
     /* Invalidate Data Cache to get the updated content of the SRAM on the second half of the ADC converted data buffer: 32 bytes */
 //    SCB_InvalidateDCache_by_Addr((uint32_t *) &samplesBuffer[BUF_SIZE/2], BUF_SIZE);
+}
+
+void HAL_ADC_ErrorCallback(ADC_HandleTypeDef *hadc) {
+    Error_Handler();
 }
 
 void ADC_step_up() {
@@ -162,7 +141,7 @@ float ADC_getTime() {
 
 s16 sStep;
 float time;
-int ii;
+int ii = 0;
 
 void ADC_step(int16_t step) {
 /*    if (step == 0) return;
@@ -187,7 +166,7 @@ void ADC_step(int16_t step) {
     // set X scale
     scaleX = ADC_Parameters[i].ScreenTime / time;
 //*/
-    ADC_setParams();
+    ADC_start();
 }
 
 /*uint16_t ICount = 0;

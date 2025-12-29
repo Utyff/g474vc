@@ -12,3 +12,4 @@
 _Alignas(32) u8 samplesBuffer[BUF_SIZE*2];
 
 u8 firstHalf = 0;
+u8 adc1cplt = 0;

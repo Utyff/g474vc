@@ -10,15 +10,18 @@
 // begin to write the GRAM command
 #define LCD_WR_RAM_CMD 0x2c
 
-#define MAX_X 320
-#define MAX_Y 240
+#define MAX_X 480
+#define MAX_Y 320
 
 // LCD important parameter set
 typedef struct {
-    u16 width;            //LCD width
-    u16 height;            //LCD height
-    vu16 id;                //LCD ID
-    u8 dir;            // horizontal screen or vertical screen control: 0, vertical screen; 1, horizontal screen.
+    u16 width;     // LCD width
+    u16 height;    // LCD height
+    vu16 id1;      // LCD ID1
+    vu16 id2;      // LCD ID2
+    vu16 id3;      // LCD ID3
+    vu16 id4;      // LCD ID4
+    u8 dir;        // horizontal screen or vertical screen control: 0, vertical screen; 1, horizontal screen.
 } _lcd_dev;
 
 // LCD parameters
@@ -39,7 +42,7 @@ extern u16 BACK_COLOR;  // Background color
 #define D2U_L2R  6 // From bottom to top, left to right
 #define D2U_R2L  7 // From bottom to top, right to left
 
-#define DFT_SCAN_DIR  L2R_U2D  // The default scan direction
+#define DFT_SCAN_DIR  L2R_D2U  // The default scan direction
 
 // 16bit RGB colors
 #define WHITE        0xFFFF

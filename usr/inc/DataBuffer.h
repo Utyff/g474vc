@@ -3,9 +3,10 @@
 
 #include "lcd.h"
 
-#define BUF_SIZE 256
+#define BUF_SIZE 1024
 extern u8 samplesBuffer[BUF_SIZE*2];
 
 extern u8 firstHalf; // first or second half of buffer writing
+extern u8 adc1cplt;  // adc conversation complete
 
 #endif //_DATABUFFER_H

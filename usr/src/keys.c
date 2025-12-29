@@ -10,6 +10,7 @@
 #define MID_ENCODER    (MAX_ENCODER/2+1)
 #define ENCODER_STEP   2   // counts per step
 #define ENCODER_TIM    TIM8
+#define MAX_ACTIONS    2u
 
 uint8_t button1Count = 0;
 uint8_t button2Count = 0;
@@ -64,12 +65,12 @@ void KEYS_scan() {
     DBG_Trace(buf);
 
     // choose type of encoder action
-    int8_t action = button1Count % (int8_t) 3;
-/*    if (action == 0) {
+    uint8_t action = button1Count % MAX_ACTIONS;
+    if (action == 0) {
         ADC_step(step);
     } else if (action == 1) {
         GEN_step(step);
-    } else {
+    } /*else {
         DAC_NextGeneratorSignal();
     } //*/
 }

@@ -7,7 +7,10 @@
 #include <DataBuffer.h>
 #include <generator.h>
 #include <adc.h>
+#include <dac.h>
+#include "ft6x36.h"
 
+//extern I2C_HandleTypeDef hi2c1;
 
 void CORECheck();
 
@@ -16,68 +19,65 @@ void FPUCheck();
 extern int ii;
 extern float time;
 
+const char buildDate[] = __DATE__;
+const char buildTime[] = __TIME__;
+
+//touch_point_t touchPoint1;
+//touch_point_t touchPoint2;
+
 
 void mainInitialize() {
+    char buf[120];
+    sprintf(buf, "\n\nBuild: %s %s\n", buildDate, buildTime);
+    DBG_Trace(buf);
+
+    CORECheck();
+    FPUCheck();
+
     DWT_Init();
     LCD_Init();
+    LCD_Clear(BLACK);
+    KEYS_init();
 
-    for (int i = 0; i < BUF_SIZE * 2; i++) {
-        samplesBuffer[i] = i;
-    }
-//    HAL_ADC_Start_DMA(&hadc1, (uint32_t *) samplesBuffer, BUF_SIZE);
-//    ADC_setParams();
+//    FT6x36(&hi2c1);
 
-//    HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_1);
-    //GEN_setParams();
+    adc1cplt = 0;
+    ADC_start();
 
-//    HAL_TIM_Encoder_Start(&htim8, TIM_CHANNEL_1);
-//    KEYS_init();
-    //initScreenBuf();
+    HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_1);
+//    GEN_setParams();
+//    DAC_startSin();
 
-//    CORECheck();
-//    FPUCheck();
+    HAL_TIM_Encoder_Start(&htim8, TIM_CHANNEL_1);
 }
 
-static u16 color = 1;
+u32 ticks =0;
 
 void mainCycle() {
-//    drawScreen();
-//    KEYS_scan();
+    if ((random() & 7) < 2) HAL_GPIO_TogglePin(LED1_GPIO_Port, LED1_Pin);
+//    getPoint(0, &touchPoint1);
+//    getPoint(1, &touchPoint2);
 
-    if ((random() & 7) < 1) HAL_GPIO_TogglePin(LED1_GPIO_Port, LED1_Pin);
-#ifdef LED2_Pin
-    if ((random() & 7) < 1) HAL_GPIO_TogglePin(LED2_GPIO_Port, LED2_Pin);
-#endif
-//    if ((random() & 7) < 1) HAL_GPIO_TogglePin(LED3_GPIO_Port, LED3_Pin);
-    if (HAL_GPIO_ReadPin(BTN1_GPIO_Port, BTN1_Pin)==GPIO_PIN_SET ) {
-        HAL_GPIO_WritePin(LED3_GPIO_Port, LED3_Pin, GPIO_PIN_SET);
-    } else {
-        HAL_GPIO_WritePin(LED3_GPIO_Port, LED3_Pin, GPIO_PIN_RESET);
-    }
+    drawScreen();
+    KEYS_scan();
 
-//    POINT_COLOR = WHITE;
-//    BACK_COLOR = BLACK;
-//    LCD_ShowxNum(0, 214, TIM8->CNT, 5, 12, 0x01);
-//    LCD_ShowxNum(30, 214, (u32) button1Count, 5, 12, 0x01);
+    POINT_COLOR = WHITE;
+    BACK_COLOR = CLR_BACKGROUND;
+    LCD_ShowxNum(0, LINE1_Y, TIM8->CNT, 5, 12, 0x0);
+    LCD_ShowxNum(30, LINE1_Y, (u32) button1Count, 5, 12, 0x0);
 //    LCD_ShowxNum(60, 214, (u32) ii, 5, 12, 0x01);
 //    LCD_ShowxNum(90, 214, (u32) time / 10, 5, 12, 0x01);
 //    LCD_ShowxNum(120, 214, (u32) firstHalf, 5, 12, 0x01);
 
-    u32 t0 = DWT_Get_Current_Tick();
-    LCD_Clear(color);
-    u32 ticks = DWT_Elapsed_Tick(t0);
-    POINT_COLOR = YELLOW;
-    LCD_ShowxNum(130, 227, ticks / DWT_IN_MICROSEC, 8, 12, 9);
-//    t00 = t0;
-//    ticks0 = ticks;
+    POINT_COLOR = MAGENTA;
+    LCD_ShowxNum(0,  LINE2_Y, ADCElapsedTick, 10, 12, 0x0);
 
-    color = color << 1;
-    if (color == 0) {
-        color = 1;
+    if (adc1cplt != 0) {
+        adc1cplt = 0;
+        ADC_start();
     }
-    POINT_COLOR = BLACK;
-    LCD_ShowxNum(0, 214, color, 10, 12, 0x0);
-    delay_ms(300);
+
+    delay_ms(30);
 }
 
 #ifdef DEBUG_TRACE_SWO
@@ -106,6 +106,9 @@ void FPUCheck(void) {
     mvfr0 = *(volatile uint32_t *) 0xE000EF40;
 
     switch (mvfr0) {
+        case 0x00000000 :
+            sprintf(buf, "No FPU\n");
+            break;
         case 0x10110021 :
             sprintf(buf, "FPU-S Single-precision only\n");
             break;
@@ -113,7 +116,7 @@ void FPUCheck(void) {
             sprintf(buf, "FPU-D Single-precision and Double-precision\n");
             break;
         default :
-            sprintf(buf, "Unknown FPU");
+            sprintf(buf, "Unknown FPU\n");
     }
     DBG_Trace(buf);
 }
@@ -123,7 +126,7 @@ void CORECheck(void) {
     uint32_t cpuid = SCB->CPUID;
     uint32_t var, pat;
 
-    sprintf(buf, "\n\nCPUID %08X DEVID %03X DEVREV %03X\n", cpuid, DBGMCU->IDCODE & 0xFFF, DBGMCU->IDCODE >> 16);
+    sprintf(buf, "\nCPUID %08X DEVID %03X REVID %04X\n", cpuid, DBGMCU->IDCODE & 0xFFF, DBGMCU->IDCODE >> 16);
     DBG_Trace(buf);
 
     pat = (cpuid & 0x0000000F);
@@ -150,11 +153,14 @@ void CORECheck(void) {
             case 0xC27 :
                 sprintf(buf, "Cortex M7 r%dp%d\n", var, pat);
                 break;
+            case 0xD21 :
+                sprintf(buf, "Cortex M33 r%dp%d\n", var, pat);
+                break;
 
             default :
-                sprintf(buf, "Unknown CORE");
+                sprintf(buf, "Unknown CORE\n");
         }
     } else
-        sprintf(buf, "Unknown CORE IMPLEMENTER");
+        sprintf(buf, "Unknown CORE IMPLEMENTER\n");
     DBG_Trace(buf);
 }
