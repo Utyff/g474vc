@@ -1,6 +1,5 @@
 #include <_main.h>
 #include <dwt.h>
-#include <graph.h>
 #include <DataBuffer.h>
 #include "adc.h"
 

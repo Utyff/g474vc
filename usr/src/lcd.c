@@ -53,8 +53,8 @@ void LCD_Set_Window(u16 sx, u16 sy, u16 ex, u16 ey) {
     LCD_WR_DATA8(ey & (u16) 0XFF);
 }
 
-#define LCD_W  320
-#define LCD_H  480
+#define LCD_W  SIZE_Y
+#define LCD_H  SIZE_X
 
 void LCD_Scan_Dir(u8 direction)
 {
@@ -89,7 +89,7 @@ void LCD_Scan_Dir(u8 direction)
 //x,y: coordinates
 //POINT_COLOR: the color of this point
 void LCD_DrawPoint(u16 x, u16 y) {
-    if (x >= MAX_X || y >= MAX_Y)
+    if (x >= SIZE_X || y >= SIZE_Y)
         return;
 
     LCD_SetCursor(x, y);       // Set the cursor position
@@ -101,7 +101,7 @@ void LCD_DrawPoint(u16 x, u16 y) {
 //x,y: coordinates
 //color: color
 void LCD_Fast_DrawPoint(u16 x, u16 y, u16 color) {
-    if (x >= MAX_X || y >= MAX_Y)
+    if (x >= SIZE_X || y >= SIZE_Y)
         return;
 
     LCD_WR_REG(LCD_SET_X);
@@ -121,12 +121,12 @@ void LCD_Fast_DrawPoint(u16 x, u16 y, u16 color) {
 void LCD_Display_Dir(u8 dir) {
     if (dir == 0) {         // Vertical screen
         lcddev.dir = 0;
-        lcddev.width = 320;
-        lcddev.height = 480;
+        lcddev.width = LCD_W;
+        lcddev.height = LCD_H;
     } else {                 // Horizontal screen
         lcddev.dir = 1;
-        lcddev.width = 480;
-        lcddev.height = 320;
+        lcddev.width = LCD_H;
+        lcddev.height = LCD_W;
     }
 
     LCD_Scan_Dir(DFT_SCAN_DIR);    // Default scan direction
@@ -268,7 +268,7 @@ void LCD_Clear(u16 color) {
     // get start time
 //    u32 t0 = DWT_Get_Current_Tick();
 
-    LCD_Set_Window(0, 0, MAX_X - 1, MAX_Y - 1);  // set the cursor position
+    LCD_Set_Window(0, 0, SIZE_X - 1, SIZE_Y - 1);  // set the cursor position
     LCD_WriteRAM_Prepare();                  // start writing GRAM
 
     u32 totalPoints = lcddev.width * lcddev.height;  // get the total number of points
@@ -278,7 +278,7 @@ void LCD_Clear(u16 color) {
 
 //    u32 LCDClearTick = DWT_Elapsed_Tick(t0);
 //    POINT_COLOR = YELLOW;
-//    LCD_ShowxNum(100, MAX_Y-13, LCDClearTick / DWT_IN_MICROSEC, 8, 12, 9);
+//    LCD_ShowxNum(100, SIZE_Y-13, LCDClearTick / DWT_IN_MICROSEC, 8, 12, 9);
 }
 
 // Fill a single color in the designated area

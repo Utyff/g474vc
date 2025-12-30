@@ -8,7 +8,7 @@
  * Make and draw oscillogram
  */
 
-uint8_t graph[MAX_X];
+uint8_t graph[SIZE_X];
 float scaleX = 1;  // no more than 1
 float scaleY = 0.94f;
 u8 trgLvl = 128;
@@ -21,7 +21,8 @@ int triggerStart1ch(u8 const *samples) {
     int i;
     u8 trgRdy = 0;
 
-    for (i = 0; i < BUF_SIZE; i++) {
+    // skip 30 because of bag
+    for (i = 30; i < BUF_SIZE; i++) {
         if (trgRdy == 0) {
             if (samples[i] < trgLvl)
                 trgRdy = 1;
@@ -58,7 +59,7 @@ void buildGraph1ch() {
         register uint8_t val = (uint8_t) (samples[i] * scaleY);
         if ((int) x != j) {
             j = (int) x;
-            if (j >= MAX_X) break;
+            if (j >= SIZE_X) break;
             graph[j] = val;
         } else {
             graph[j] = (graph[j] + val) >> 1; // arithmetical mean
@@ -77,12 +78,12 @@ void drawGraph() {
     uint32_t t0 = DWT_Get_Current_Tick();
 
     prev = graph[0];
-    for (u16 i = 1; i < MAX_X; i++) {
+    for (u16 i = 1; i < SIZE_X; i++) {
         //LCD_DrawLine(i - (u16) 1, prev, i, graph[i]);
         LCD_Fill(i, prev, i, graph[i], CLR_CH1);
         prev = graph[i];
     }
-    LCD_Set_Window(0, 0, MAX_X - 1, MAX_Y - 1);
+    LCD_Set_Window(0, 0, SIZE_X - 1, SIZE_Y - 1);
 
     DrawGraphTick = DWT_Elapsed_Tick(t0);
 //  LCD_ShowxNum(150,227, DrawGraphTick/168,  10,12, 9);
@@ -94,10 +95,10 @@ void eraseGraph() {
 
     POINT_COLOR = BLACK;
     prev = graph[0];
-    for (u16 i = 1; i < MAX_X; i++) {
+    for (u16 i = 1; i < SIZE_X; i++) {
         //LCD_DrawLine(i - (u16) 1, prev, i, graph[i]);
         LCD_Fill(i, prev, i, graph[i], POINT_COLOR);
         prev = graph[i];
     }
-    LCD_Set_Window(0, 0, MAX_X - 1, MAX_Y - 1);
+    LCD_Set_Window(0, 0, SIZE_X - 1, SIZE_Y - 1);
 }
