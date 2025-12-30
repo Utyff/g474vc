@@ -18,11 +18,11 @@
 
 #define TIMCLK 170000000
 
-uint32_t currentGenParam = 13;
-uint32_t tim1Prescaler = 9;
-uint32_t tim1Period = 424;
-uint32_t tim1Pulse = 104;
-uint32_t tim1Freq = 40000;
+uint32_t currentGenParam = 10;
+uint32_t tim1Prescaler = 99;
+uint32_t tim1Period = 16;
+uint32_t tim1Pulse = 7;
+uint32_t tim1Freq = 100000;
 uint32_t tim1Freq2 = 0;
 
 struct GEN_param {
