@@ -81,7 +81,7 @@ void GEN_step(int16_t step) {
 
     GEN_setParams();
 
-    sprintf(msg, "After step. param: %u, presc: %u, period: %u freq: %u\n",
+    sprintf(msg, "GEN step. param: %u, presc: %u, period: %u freq: %u\n",
             currentGenParam, tim1Prescaler, tim1Period, tim1Freq);
     DBG_Trace(msg);
 }
