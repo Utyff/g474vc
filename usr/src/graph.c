@@ -21,8 +21,8 @@ int triggerStart1ch(u8 const *samples) {
     int i;
     u8 trgRdy = 0;
 
-    // skip 30 because of bag
-    for (i = 30; i < BUF_SIZE; i++) {
+    // skip 50 because of adc bag
+    for (i = 50; i < BUF_SIZE; i++) {
         if (trgRdy == 0) {
             if (samples[i] < trgLvl)
                 trgRdy = 1;
