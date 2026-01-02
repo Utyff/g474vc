@@ -4,24 +4,24 @@
 
 
 void drawFrame() {
-    u16 x, y, step = 32;
+    u16 x, y;
 
 //    LCD_Clear(BLACK);
     eraseGraph();
-    POINT_COLOR = GRAY;  // Drawing pen color
+//    POINT_COLOR = GRAY;  // Drawing pen color
     BACK_COLOR = CLR_BACKGROUND;
 
     u32 t0 = DWT_Get_Current_Tick();
 
-    for (y = step; y < SIZE_Y; y += step) {
-        if (y == 128) POINT_COLOR = GRAY;  // Drawing pen color
-        else POINT_COLOR = DARKGRAY;
+    for (y = FRAME_DIV_PIXELS; y < SIZE_Y; y += FRAME_DIV_PIXELS) {
+        if (y == 128) POINT_COLOR = GRAY;  // coordinate axis
+        else POINT_COLOR = DARKGRAY;       // division line
         LCD_Fill(0, y, SIZE_X - 1, y, POINT_COLOR);
     }
 
-    for (x = step; x < SIZE_X; x += step) {
-        if (x == 160) POINT_COLOR = GRAY;  // Drawing pen color
-        else POINT_COLOR = DARKGRAY;
+    for (x = FRAME_DIV_PIXELS; x < SIZE_X; x += FRAME_DIV_PIXELS) {
+        if (x == 160) POINT_COLOR = GRAY;  // coordinate axis
+        else POINT_COLOR = DARKGRAY;       // division line
         LCD_Fill(x, 0, x, SIZE_Y - 1, POINT_COLOR);
     }
 

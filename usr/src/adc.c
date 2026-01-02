@@ -1,105 +1,106 @@
 #include <_main.h>
 #include <dwt.h>
 #include <DataBuffer.h>
+#include "draw.h"
+#include "graph.h"
 #include "adc.h"
 
 // Recommended ADC clock = 60mHz Max = 170mHz :)
-struct ADC_param {
+typedef struct {
     uint32_t ADC_Prescaler;
     uint32_t ADC_SampleCycles;
     float SampleTime;    // microseconds
-};
-typedef struct ADC_param ADC_PARAM;
+} ADC_param;
 
 static void ADC1_Init(void);
 static void ADC2_Init(void);
+static void ADC_setParams();
 
 #define ADC_Parameters_Size  63
-const ADC_PARAM ADC_Parameters[ADC_Parameters_Size] = {
-        {ADC_CLOCK_ASYNC_DIV1, ADC_SAMPLETIME_2CYCLES_5,  0.06470588f},
-        {ADC_CLOCK_ASYNC_DIV1, ADC_SAMPLETIME_6CYCLES_5,  0.08823529f},
-        {ADC_CLOCK_ASYNC_DIV1, ADC_SAMPLETIME_12CYCLES_5,  0.12352941f},
-        {ADC_CLOCK_ASYNC_DIV2, ADC_SAMPLETIME_2CYCLES_5,  0.12941176f},
-        {ADC_CLOCK_ASYNC_DIV2, ADC_SAMPLETIME_6CYCLES_5,  0.17647059f},
-        {ADC_CLOCK_ASYNC_DIV1, ADC_SAMPLETIME_24CYCLES_5,  0.19411765f},
-        {ADC_CLOCK_ASYNC_DIV2, ADC_SAMPLETIME_12CYCLES_5,  0.24705882f},
-        {ADC_CLOCK_ASYNC_DIV4, ADC_SAMPLETIME_2CYCLES_5,  0.25882353f},
-        {ADC_CLOCK_ASYNC_DIV1, ADC_SAMPLETIME_47CYCLES_5,  0.32941176f},
-        {ADC_CLOCK_ASYNC_DIV4, ADC_SAMPLETIME_6CYCLES_5,  0.35294118f},
-        {ADC_CLOCK_ASYNC_DIV2, ADC_SAMPLETIME_24CYCLES_5,  0.38823529f},
-        {ADC_CLOCK_ASYNC_DIV6, ADC_SAMPLETIME_2CYCLES_5,  0.38823529f},
-        {ADC_CLOCK_ASYNC_DIV4, ADC_SAMPLETIME_12CYCLES_5,  0.49411765f},
-        {ADC_CLOCK_ASYNC_DIV8, ADC_SAMPLETIME_2CYCLES_5,  0.51764706f},
-        {ADC_CLOCK_ASYNC_DIV6, ADC_SAMPLETIME_6CYCLES_5,  0.52941176f},
-        {ADC_CLOCK_ASYNC_DIV1, ADC_SAMPLETIME_92CYCLES_5,  0.59411765f},
-        {ADC_CLOCK_ASYNC_DIV10, ADC_SAMPLETIME_2CYCLES_5,  0.64705882f},
-        {ADC_CLOCK_ASYNC_DIV2, ADC_SAMPLETIME_47CYCLES_5,  0.65882353f},
-        {ADC_CLOCK_ASYNC_DIV8, ADC_SAMPLETIME_6CYCLES_5,  0.70588235f},
-        {ADC_CLOCK_ASYNC_DIV6, ADC_SAMPLETIME_12CYCLES_5,  0.74117647f},
-        {ADC_CLOCK_ASYNC_DIV4, ADC_SAMPLETIME_24CYCLES_5,  0.77647059f},
-        {ADC_CLOCK_ASYNC_DIV12, ADC_SAMPLETIME_2CYCLES_5,  0.77647059f},
-        {ADC_CLOCK_ASYNC_DIV10, ADC_SAMPLETIME_6CYCLES_5,  0.88235294f},
-        {ADC_CLOCK_ASYNC_DIV8, ADC_SAMPLETIME_12CYCLES_5,  0.98823529f},
-        {ADC_CLOCK_ASYNC_DIV16, ADC_SAMPLETIME_2CYCLES_5,  1.03529412f},
-        {ADC_CLOCK_ASYNC_DIV12, ADC_SAMPLETIME_6CYCLES_5,  1.05882353f},
-        {ADC_CLOCK_ASYNC_DIV6, ADC_SAMPLETIME_24CYCLES_5,  1.16470588f},
-        {ADC_CLOCK_ASYNC_DIV2, ADC_SAMPLETIME_92CYCLES_5,  1.18823529f},
+const ADC_param ADC_Parameters[ADC_Parameters_Size] = {
+        {ADC_CLOCK_ASYNC_DIV1,  ADC_SAMPLETIME_2CYCLES_5,   0.06470588f},
+        {ADC_CLOCK_ASYNC_DIV1,  ADC_SAMPLETIME_6CYCLES_5,   0.08823529f},
+        {ADC_CLOCK_ASYNC_DIV1,  ADC_SAMPLETIME_12CYCLES_5,  0.12352941f},
+        {ADC_CLOCK_ASYNC_DIV2,  ADC_SAMPLETIME_2CYCLES_5,   0.12941176f},
+        {ADC_CLOCK_ASYNC_DIV2,  ADC_SAMPLETIME_6CYCLES_5,   0.17647059f},
+        {ADC_CLOCK_ASYNC_DIV1,  ADC_SAMPLETIME_24CYCLES_5,  0.19411765f},
+        {ADC_CLOCK_ASYNC_DIV2,  ADC_SAMPLETIME_12CYCLES_5,  0.24705882f},
+        {ADC_CLOCK_ASYNC_DIV4,  ADC_SAMPLETIME_2CYCLES_5,   0.25882353f},
+        {ADC_CLOCK_ASYNC_DIV1,  ADC_SAMPLETIME_47CYCLES_5,  0.32941176f},
+        {ADC_CLOCK_ASYNC_DIV4,  ADC_SAMPLETIME_6CYCLES_5,   0.35294118f},
+        {ADC_CLOCK_ASYNC_DIV2,  ADC_SAMPLETIME_24CYCLES_5,  0.38823529f},
+        {ADC_CLOCK_ASYNC_DIV6,  ADC_SAMPLETIME_2CYCLES_5,   0.38823529f},
+        {ADC_CLOCK_ASYNC_DIV4,  ADC_SAMPLETIME_12CYCLES_5,  0.49411765f},
+        {ADC_CLOCK_ASYNC_DIV8,  ADC_SAMPLETIME_2CYCLES_5,   0.51764706f},
+        {ADC_CLOCK_ASYNC_DIV6,  ADC_SAMPLETIME_6CYCLES_5,   0.52941176f},
+        {ADC_CLOCK_ASYNC_DIV1,  ADC_SAMPLETIME_92CYCLES_5,  0.59411765f},
+        {ADC_CLOCK_ASYNC_DIV10, ADC_SAMPLETIME_2CYCLES_5,   0.64705882f},
+        {ADC_CLOCK_ASYNC_DIV2,  ADC_SAMPLETIME_47CYCLES_5,  0.65882353f},
+        {ADC_CLOCK_ASYNC_DIV8,  ADC_SAMPLETIME_6CYCLES_5,   0.70588235f},
+        {ADC_CLOCK_ASYNC_DIV6,  ADC_SAMPLETIME_12CYCLES_5,  0.74117647f},
+        {ADC_CLOCK_ASYNC_DIV4,  ADC_SAMPLETIME_24CYCLES_5,  0.77647059f},
+        {ADC_CLOCK_ASYNC_DIV12, ADC_SAMPLETIME_2CYCLES_5,   0.77647059f},
+        {ADC_CLOCK_ASYNC_DIV10, ADC_SAMPLETIME_6CYCLES_5,   0.88235294f},
+        {ADC_CLOCK_ASYNC_DIV8,  ADC_SAMPLETIME_12CYCLES_5,  0.98823529f},
+        {ADC_CLOCK_ASYNC_DIV16, ADC_SAMPLETIME_2CYCLES_5,   1.03529412f},
+        {ADC_CLOCK_ASYNC_DIV12, ADC_SAMPLETIME_6CYCLES_5,   1.05882353f},
+        {ADC_CLOCK_ASYNC_DIV6,  ADC_SAMPLETIME_24CYCLES_5,  1.16470588f},
+        {ADC_CLOCK_ASYNC_DIV2,  ADC_SAMPLETIME_92CYCLES_5,  1.18823529f},
         {ADC_CLOCK_ASYNC_DIV10, ADC_SAMPLETIME_12CYCLES_5,  1.23529412f},
-        {ADC_CLOCK_ASYNC_DIV4, ADC_SAMPLETIME_47CYCLES_5,  1.31764706f},
-        {ADC_CLOCK_ASYNC_DIV16, ADC_SAMPLETIME_6CYCLES_5,  1.41176471f},
+        {ADC_CLOCK_ASYNC_DIV4,  ADC_SAMPLETIME_47CYCLES_5,  1.31764706f},
+        {ADC_CLOCK_ASYNC_DIV16, ADC_SAMPLETIME_6CYCLES_5,   1.41176471f},
         {ADC_CLOCK_ASYNC_DIV12, ADC_SAMPLETIME_12CYCLES_5,  1.48235294f},
-        {ADC_CLOCK_ASYNC_DIV1, ADC_SAMPLETIME_247CYCLES_5,  1.50588235f},
-        {ADC_CLOCK_ASYNC_DIV8, ADC_SAMPLETIME_24CYCLES_5,  1.55294118f},
+        {ADC_CLOCK_ASYNC_DIV1,  ADC_SAMPLETIME_247CYCLES_5, 1.50588235f},
+        {ADC_CLOCK_ASYNC_DIV8,  ADC_SAMPLETIME_24CYCLES_5,  1.55294118f},
         {ADC_CLOCK_ASYNC_DIV10, ADC_SAMPLETIME_24CYCLES_5,  1.94117647f},
         {ADC_CLOCK_ASYNC_DIV16, ADC_SAMPLETIME_12CYCLES_5,  1.97647059f},
-        {ADC_CLOCK_ASYNC_DIV6, ADC_SAMPLETIME_47CYCLES_5,  1.97647059f},
-        {ADC_CLOCK_ASYNC_DIV32, ADC_SAMPLETIME_2CYCLES_5,  2.07058824f},
+        {ADC_CLOCK_ASYNC_DIV6,  ADC_SAMPLETIME_47CYCLES_5,  1.97647059f},
+        {ADC_CLOCK_ASYNC_DIV32, ADC_SAMPLETIME_2CYCLES_5,   2.07058824f},
         {ADC_CLOCK_ASYNC_DIV12, ADC_SAMPLETIME_24CYCLES_5,  2.32941176f},
-        {ADC_CLOCK_ASYNC_DIV4, ADC_SAMPLETIME_92CYCLES_5,  2.37647059f},
-        {ADC_CLOCK_ASYNC_DIV8, ADC_SAMPLETIME_47CYCLES_5,  2.63529412f},
-        {ADC_CLOCK_ASYNC_DIV32, ADC_SAMPLETIME_6CYCLES_5,  2.82352941f},
-        {ADC_CLOCK_ASYNC_DIV2, ADC_SAMPLETIME_247CYCLES_5,  3.01176471f},
+        {ADC_CLOCK_ASYNC_DIV4,  ADC_SAMPLETIME_92CYCLES_5,  2.37647059f},
+        {ADC_CLOCK_ASYNC_DIV8,  ADC_SAMPLETIME_47CYCLES_5,  2.63529412f},
+        {ADC_CLOCK_ASYNC_DIV32, ADC_SAMPLETIME_6CYCLES_5,   2.82352941f},
+        {ADC_CLOCK_ASYNC_DIV2,  ADC_SAMPLETIME_247CYCLES_5, 3.01176471f},
         {ADC_CLOCK_ASYNC_DIV16, ADC_SAMPLETIME_24CYCLES_5,  3.10588235f},
         {ADC_CLOCK_ASYNC_DIV10, ADC_SAMPLETIME_47CYCLES_5,  3.29411765f},
-        {ADC_CLOCK_ASYNC_DIV6, ADC_SAMPLETIME_92CYCLES_5,  3.56470588f},
+        {ADC_CLOCK_ASYNC_DIV6,  ADC_SAMPLETIME_92CYCLES_5,  3.56470588f},
         {ADC_CLOCK_ASYNC_DIV32, ADC_SAMPLETIME_12CYCLES_5,  3.95294118f},
         {ADC_CLOCK_ASYNC_DIV12, ADC_SAMPLETIME_47CYCLES_5,  3.95294118f},
-        {ADC_CLOCK_ASYNC_DIV8, ADC_SAMPLETIME_92CYCLES_5,  4.75294118f},
+        {ADC_CLOCK_ASYNC_DIV8,  ADC_SAMPLETIME_92CYCLES_5,  4.75294118f},
         {ADC_CLOCK_ASYNC_DIV16, ADC_SAMPLETIME_47CYCLES_5,  5.27058824f},
         {ADC_CLOCK_ASYNC_DIV10, ADC_SAMPLETIME_92CYCLES_5,  5.94117647f},
-        {ADC_CLOCK_ASYNC_DIV4, ADC_SAMPLETIME_247CYCLES_5,  6.02352941f},
+        {ADC_CLOCK_ASYNC_DIV4,  ADC_SAMPLETIME_247CYCLES_5, 6.02352941f},
         {ADC_CLOCK_ASYNC_DIV32, ADC_SAMPLETIME_24CYCLES_5,  6.21176471f},
         {ADC_CLOCK_ASYNC_DIV12, ADC_SAMPLETIME_92CYCLES_5,  7.12941176f},
-        {ADC_CLOCK_ASYNC_DIV6, ADC_SAMPLETIME_247CYCLES_5,  9.03529412f},
+        {ADC_CLOCK_ASYNC_DIV6,  ADC_SAMPLETIME_247CYCLES_5, 9.03529412f},
         {ADC_CLOCK_ASYNC_DIV16, ADC_SAMPLETIME_92CYCLES_5,  9.50588235f},
         {ADC_CLOCK_ASYNC_DIV32, ADC_SAMPLETIME_47CYCLES_5,  10.54117647f},
-        {ADC_CLOCK_ASYNC_DIV8, ADC_SAMPLETIME_247CYCLES_5,  12.04705882f},
-        {ADC_CLOCK_ASYNC_DIV10, ADC_SAMPLETIME_247CYCLES_5,  15.05882353f},
-        {ADC_CLOCK_ASYNC_DIV12, ADC_SAMPLETIME_247CYCLES_5,  18.07058824f},
+        {ADC_CLOCK_ASYNC_DIV8,  ADC_SAMPLETIME_247CYCLES_5, 12.04705882f},
+        {ADC_CLOCK_ASYNC_DIV10, ADC_SAMPLETIME_247CYCLES_5, 15.05882353f},
+        {ADC_CLOCK_ASYNC_DIV12, ADC_SAMPLETIME_247CYCLES_5, 18.07058824f},
         {ADC_CLOCK_ASYNC_DIV32, ADC_SAMPLETIME_92CYCLES_5,  19.01176471f},
-        {ADC_CLOCK_ASYNC_DIV16, ADC_SAMPLETIME_247CYCLES_5,  24.09411765f},
-        {ADC_CLOCK_ASYNC_DIV32, ADC_SAMPLETIME_247CYCLES_5,  48.18823529f},
+        {ADC_CLOCK_ASYNC_DIV16, ADC_SAMPLETIME_247CYCLES_5, 24.09411765f},
+        {ADC_CLOCK_ASYNC_DIV32, ADC_SAMPLETIME_247CYCLES_5, 48.18823529f},
 };
 
 uint32_t currentAdcParam = 0;
 uint32_t ADC_Prescaler = ADC_CLOCK_ASYNC_DIV1;
-uint32_t ADC_SampleTime = ADC_SAMPLETIME_2CYCLES_5;
+uint32_t ADC_SampleCycles = ADC_SAMPLETIME_2CYCLES_5;
+float time;
 
-uint16_t ScreenTime = 0;      // index in ScreenTimes
-uint16_t ScreenTime_adj = 0;  // 0-9 shift in ScreenTime
-const float ScreenTimes[] = {100, 200, 500, 1000, 2000, 5000, 10000, 20000};  // sweep screen, microseconds
+uint16_t DivTime = 0;      // index in DivTimes
+const float DivTimes[] = {2, 5, 10, 20, 50, 100, 200, 500, 1000};  // div time, microseconds
+#define DEV_TIMES_SIZE (sizeof(DivTimes) / sizeof(DivTimes[0]))
 
 uint32_t ADCStartTick;         // time when start ADC buffer fill
-uint32_t ADCHalfElapsedTick;   // the last time half buffer fill
 uint32_t ADCElapsedTick;       // the last time buffer fill
 
 /**
  * Copy of MX_ADC1_Init()
  */
-HAL_StatusTypeDef adc_err=0;
+HAL_StatusTypeDef adc_err = 0;
 void ADC_start() {
-    ADC_Prescaler = ADC_Parameters[currentAdcParam].ADC_Prescaler;
-    ADC_SampleTime = ADC_Parameters[currentAdcParam].ADC_SampleCycles;
+    ADC_setParams();
 
     if (hadc1.State != HAL_ADC_STATE_READY) {
         HAL_ADCEx_MultiModeStop_DMA(&hadc1);
@@ -127,7 +128,6 @@ uint32_t cpltCount = 0;
   * @retval None
   */
 void HAL_ADC_ConvHalfCpltCallback(ADC_HandleTypeDef *hadc) {
-    ADCHalfElapsedTick = DWT_Elapsed_Tick(ADCStartTick);
     halfCount++;
     firstHalf = 0;
     /* Invalidate Data Cache to get the updated content of the SRAM on the first half of the ADC converted data buffer: 32 bytes */
@@ -151,94 +151,40 @@ void HAL_ADC_ErrorCallback(ADC_HandleTypeDef *hadc) {
     Error_Handler();
 }
 
-void ADC_step_up() {
-    if (ScreenTime_adj < 9)
-        ScreenTime_adj++;
-    else if (ScreenTime < sizeof(ScreenTimes) / sizeof(ScreenTimes[0]) - 2) // last value forbidden to assign
-        ScreenTime_adj = 0, ScreenTime++;
-}
-
-
-void ADC_step_down() {
-    if (ScreenTime_adj > 0)
-        ScreenTime_adj--;
-    else if (ScreenTime > 0)
-        ScreenTime_adj = 9, ScreenTime--;
-}
-
-
-float ADC_getTime() {
-    float time = ScreenTimes[ScreenTime];
-    // next time always exist because last forbidden to assign
-    float adj = (ScreenTimes[ScreenTime + 1] - time) * ScreenTime_adj / 10;
-    time += adj;
-    return time;
-}
-
-s16 sStep;
-float time;
 
 void ADC_step(int16_t step) {
     if (step == 0) return;
     if (step > 0) {
-        if (++currentAdcParam >= ADC_Parameters_Size) currentAdcParam = ADC_Parameters_Size - 1;
-    } else {
-        if (currentAdcParam-- == 0) currentAdcParam = 0;
+        if (DivTime < DEV_TIMES_SIZE - 1) {
+            DivTime++;
+        }
     }
-//    ADC_Prescaler = ADC_Parameters[currentAdcParam].ADC_Prescaler;
-//    ADC_SampleCycles = ADC_Parameters[currentAdcParam].ADC_SampleCycles;
-    return;
-
-/*  if (step > 0) ADC_step_up();
-    else ADC_step_down();
-    sStep = step;
-
-    time = ADC_getTime(); // get screen sweep time
-
-    // looking last parameters set with ScreenTime less than required time
-    int i = 1;
-    while (ADC_Parameters[i].ScreenTime < time) {
-        i++;
-        if (i >= ADC_Parameters_Size) break;
+    else {
+        if (DivTime > 0) {
+            DivTime--;
+        }
     }
 
-    i--;
-    currentAdcParam = i;
-    ADC_Prescaler = ADC_Parameters[i].ADC_Prescaler;
-    ADC_SampleCycles = ADC_Parameters[i].ADC_SampleCycles;
-
-    // set X scale
-    scaleX = ADC_Parameters[i].ScreenTime / time;
-//*/
-//    ADC_start();
+    ADC_setParams();
 }
 
-/*uint16_t ICount = 0;
+static void ADC_setParams() {
+    time = DivTimes[DivTime]; // get screen sweep time
 
-// dma2 stream 0 irq handler
-void DMA2_Stream0_IRQHandler() {
-    ICount++;
-    // Test on DMA Stream HalfTransfer Complete interrupt
-    if (DMA_GetITStatus(DMA2_Stream0, DMA_IT_HTIF0)) {
-        // Clear Stream0 HalfTransfer
-        DMA_ClearITPendingBit(DMA2_Stream0, DMA_IT_HTIF0);
-
-        // count time for half circle
-        ADCHalfElapsedTick = DWT_Elapsed_Tick(ADCStartTick);
-        half = 0;
+    // looking last parameters set with DivTime less than required time
+    currentAdcParam = 1;
+    while (ADC_Parameters[currentAdcParam].SampleTime / 2 * FRAME_DIV_PIXELS < time) {
+        currentAdcParam++;
+        if (currentAdcParam >= ADC_Parameters_Size) break;
     }
 
-    // Test on DMA Stream Transfer Complete interrupt
-    if (DMA_GetITStatus(DMA2_Stream0, DMA_IT_TCIF0)) {
-        // Clear Stream0 Transfer Complete
-        DMA_ClearITPendingBit(DMA2_Stream0, DMA_IT_TCIF0);
+    currentAdcParam--;
+    ADC_Prescaler = ADC_Parameters[currentAdcParam].ADC_Prescaler;
+    ADC_SampleCycles = ADC_Parameters[currentAdcParam].ADC_SampleCycles;
 
-        // count time for one circle
-        ADCElapsedTick = DWT_Elapsed_Tick(ADCStartTick);
-        ADCStartTick = DWT_Get_Current_Tick();
-        half = 1;
-    }
-} //*/
+    // set X scale
+    scaleX = ADC_Parameters[currentAdcParam].SampleTime / 2 * FRAME_DIV_PIXELS / time;
+}
 
 /**
   * @brief ADC1 Initialization Function
@@ -289,7 +235,7 @@ static void ADC1_Init(void) {
     */
     sConfig.Channel = ADC_CHANNEL_1;
     sConfig.Rank = ADC_REGULAR_RANK_1;
-    sConfig.SamplingTime = ADC_SampleTime;
+    sConfig.SamplingTime = ADC_SampleCycles;
     sConfig.SingleDiff = ADC_SINGLE_ENDED;
     sConfig.OffsetNumber = ADC_OFFSET_NONE;
     sConfig.Offset = 0;
@@ -335,7 +281,7 @@ static void ADC2_Init(void) {
     */
     sConfig.Channel = ADC_CHANNEL_1;
     sConfig.Rank = ADC_REGULAR_RANK_1;
-    sConfig.SamplingTime = ADC_SampleTime;
+    sConfig.SamplingTime = ADC_SampleCycles;
     sConfig.SingleDiff = ADC_SINGLE_ENDED;
     sConfig.OffsetNumber = ADC_OFFSET_NONE;
     sConfig.Offset = 0;
