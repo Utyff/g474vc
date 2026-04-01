@@ -165,7 +165,7 @@ void LCD_Init(void) {
 }
 
 void LCD_Init_sequence() {
-//************* ST7796S 340x480 **********//
+//************* ST7796S 320x480 **********//
     LCD_WR_REG(0x11);
 
     delay_ms(120);              //Delay 120ms
