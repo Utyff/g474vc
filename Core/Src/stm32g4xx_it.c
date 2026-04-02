@@ -22,6 +22,7 @@
 #include "stm32g4xx_it.h"
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#include "_main.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -197,6 +198,36 @@ void SysTick_Handler(void)
 /* For the available peripheral interrupt handler names,                      */
 /* please refer to the startup file (startup_stm32g4xx.s).                    */
 /******************************************************************************/
+
+/**
+  * @brief This function handles DMA1 channel1 global interrupt.
+  */
+void DMA1_Channel1_IRQHandler(void)
+{
+  /* USER CODE BEGIN DMA1_Channel1_IRQn 0 */
+    static uint32_t cntDMA1_1T = 0;
+    static uint32_t cntDMA1_1H = 0;
+    static uint32_t cntDMA1_1E = 0;
+    static uint32_t cntDMA1_1O = 0;
+
+    if (LL_DMA_IsActiveFlag_TC1(DMA1)) {
+        cntDMA1_1T++;
+        DMA1_0_busy = 0;
+        LL_DMA_ClearFlag_TC1(DMA1);
+    } else if (LL_DMA_IsActiveFlag_HT1(DMA1)) {
+        cntDMA1_1H++;
+        LL_DMA_ClearFlag_HT1(DMA1);
+    } else if (LL_DMA_IsActiveFlag_TE1(DMA1)) {
+        cntDMA1_1E++;
+        LL_DMA_ClearFlag_TE1(DMA1);
+    } else {
+        cntDMA1_1O++;
+    }
+    /* USER CODE END DMA1_Channel1_IRQn 0 */
+  /* USER CODE BEGIN DMA1_Channel1_IRQn 1 */
+
+  /* USER CODE END DMA1_Channel1_IRQn 1 */
+}
 
 /* USER CODE BEGIN 1 */
 
