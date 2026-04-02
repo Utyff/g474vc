@@ -92,7 +92,7 @@ void UART_Transmit(const char *msg) {
     stpcpy(txBuffer, msg);
     // SCB_CleanDCache_by_Addr((uint32_t*)txBuffer, txBufferSize);
 
-    // Stream 0 = TX
+    // Channel 1 = TX
     LL_DMA_EnableIT_TC(DMA1, LL_DMA_CHANNEL_1);
     LL_DMA_EnableIT_TE(DMA1, LL_DMA_CHANNEL_1);
     LL_DMA_ConfigAddresses(DMA1,
