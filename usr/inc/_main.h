@@ -34,7 +34,6 @@ void SWO_Trace(uint8_t* msg);
 
 #include "string.h"
 
-// #define DBG_Trace(msg) HAL_UART_Transmit(&huart1, (uint8_t*)(msg), (uint16_t)strlen((char*)(msg)), 0xFFFF)
 #define DBG_Trace(msg) UART_Transmit(msg)
 
 #elif defined(DEBUG_TRACE_NONE)

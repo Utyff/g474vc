@@ -214,15 +214,16 @@ void DMA1_Channel1_IRQHandler(void)
         cntDMA1_1T++;
         DMA1_0_busy = 0;
         LL_DMA_ClearFlag_TC1(DMA1);
-    } else if (LL_DMA_IsActiveFlag_HT1(DMA1)) {
+    }
+    if (LL_DMA_IsActiveFlag_HT1(DMA1)) {
         cntDMA1_1H++;
         LL_DMA_ClearFlag_HT1(DMA1);
-    } else if (LL_DMA_IsActiveFlag_TE1(DMA1)) {
+    }
+    if (LL_DMA_IsActiveFlag_TE1(DMA1)) {
         cntDMA1_1E++;
         LL_DMA_ClearFlag_TE1(DMA1);
-    } else {
-        cntDMA1_1O++;
     }
+    cntDMA1_1O++;
   /* USER CODE END DMA1_Channel1_IRQn 0 */
   /* USER CODE BEGIN DMA1_Channel1_IRQn 1 */
 

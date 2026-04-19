@@ -27,20 +27,21 @@ uint8_t DMA1_0_busy;
 
 void UART_start() {
     DMA1_0_busy = 0;
-    LL_DMA_EnableIT_TC(DMA1, LL_DMA_CHANNEL_1);
-    LL_DMA_EnableIT_TE(DMA1, LL_DMA_CHANNEL_1);
-    LL_USART_EnableDMAReq_TX(USART1);
-    LL_USART_EnableDirectionTx(USART1);
+    // LL_DMA_EnableIT_TC(DMA1, LL_DMA_CHANNEL_1);
+    // LL_DMA_EnableIT_TE(DMA1, LL_DMA_CHANNEL_1);
+    // LL_USART_EnableDMAReq_TX(USART1);
+    // LL_USART_EnableDirectionTx(USART1);
 }
 
 void mainInitialize() {
     UART_start();
     char buf[120];
     sprintf(buf, "\n\nBuild: %s %s\n", buildDate, buildTime);
-    DBG_Trace(buf);
+    // UART_Transmit("UART1\n");
+    // DBG_Trace(buf);
 
-    CORECheck();
-    FPUCheck();
+    // CORECheck();
+    // FPUCheck();
 
     DWT_Init();
     // LCD_Init();
@@ -57,6 +58,11 @@ void mainInitialize() {
 u32 ticks =0;
 
 void mainCycle() {
+    char buf[120];
+    static uint32_t nn = 0;
+    sprintf(buf, "\nUART %D\n", ++nn);
+    DBG_Trace(buf);
+
     if ((random() & 7) < 2) GPIOB->ODR ^= LED1_Pin;
     // getPoint(0, &touchPoint1);
     // getPoint(1, &touchPoint2);
@@ -92,20 +98,20 @@ void UART_Transmit(const char *msg) {
     stpcpy(txBuffer, msg);
     // SCB_CleanDCache_by_Addr((uint32_t*)txBuffer, txBufferSize);
 
+    LL_DMA_DisableChannel(DMA1, LL_DMA_CHANNEL_1);
     // Channel 1 = TX
     LL_DMA_EnableIT_TC(DMA1, LL_DMA_CHANNEL_1);
     LL_DMA_EnableIT_TE(DMA1, LL_DMA_CHANNEL_1);
     LL_DMA_ConfigAddresses(DMA1,
                            LL_DMA_CHANNEL_1,
                            (uint32_t) txBuffer,
-                           LL_USART_DMA_GetRegAddr(USART1, LL_USART_DMA_REG_DATA_TRANSMIT),
-                           LL_DMA_GetDataTransferDirection(DMA1, LL_DMA_CHANNEL_1));
+                           (uint32_t) &(USART1->TDR),
+                           LL_DMA_DIRECTION_MEMORY_TO_PERIPH);
     LL_DMA_SetDataLength(DMA1, LL_DMA_CHANNEL_1, txBufferSize);
 
     LL_DMA_EnableChannel(DMA1, LL_DMA_CHANNEL_1);
     LL_USART_EnableDMAReq_TX(USART1);
     LL_USART_EnableDirectionTx(USART1);
-    delay_ms(100);
 }
 
 #ifdef DEBUG_TRACE_SWO
