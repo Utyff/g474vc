@@ -27,43 +27,36 @@ uint8_t DMA1_0_busy;
 
 void UART_start() {
     DMA1_0_busy = 0;
-    // LL_DMA_EnableIT_TC(DMA1, LL_DMA_CHANNEL_1);
-    // LL_DMA_EnableIT_TE(DMA1, LL_DMA_CHANNEL_1);
-    // LL_USART_EnableDMAReq_TX(USART1);
-    // LL_USART_EnableDirectionTx(USART1);
 }
 
 void mainInitialize() {
     UART_start();
     char buf[120];
     sprintf(buf, "\n\nBuild: %s %s\n", buildDate, buildTime);
-    // UART_Transmit("UART1\n");
-    // DBG_Trace(buf);
+    DBG_Trace(buf);
 
-    // CORECheck();
-    // FPUCheck();
+    CORECheck();
+    FPUCheck();
 
     DWT_Init();
     // LCD_Init();
     // LCD_Clear(BLACK);
-    // KEYS_init();
+    KEYS_init();
 
     // ADCworks = 0;
     // ADC_start();
 
-    // GEN_setParams();
+    GEN_setParams();
     // DAC_startSin();
 }
 
-u32 ticks =0;
+u32 ticks = 0;
 
 void mainCycle() {
-    char buf[120];
-    static uint32_t nn = 0;
-    sprintf(buf, "\nUART %D\n", ++nn);
-    DBG_Trace(buf);
 
     if ((random() & 7) < 2) GPIOB->ODR ^= LED1_Pin;
+    if ((random() & 7) < 2) GPIOB->ODR ^= LED2_Pin;
+    if ((random() & 7) < 2) GPIOB->ODR ^= LED3_Pin;
     // getPoint(0, &touchPoint1);
     // getPoint(1, &touchPoint2);
 
@@ -72,7 +65,7 @@ void mainCycle() {
     //     ADC_start();
     // }
 
-    // KEYS_scan();
+    KEYS_scan();
 
     // POINT_COLOR = CYAN;
     // BACK_COLOR = CLR_BACKGROUND;
