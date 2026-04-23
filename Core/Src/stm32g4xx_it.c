@@ -230,6 +230,36 @@ void DMA1_Channel1_IRQHandler(void)
   /* USER CODE END DMA1_Channel1_IRQn 1 */
 }
 
+/**
+  * @brief This function handles DMA1 channel2 global interrupt.
+  */
+void DMA1_Channel2_IRQHandler(void)
+{
+  /* USER CODE BEGIN DMA1_Channel2_IRQn 0 */
+    static uint32_t cntDMA1_2T = 0;
+    static uint32_t cntDMA1_2H = 0;
+    static uint32_t cntDMA1_2E = 0;
+    static uint32_t cntDMA1_2O = 0;
+
+    if (LL_DMA_IsActiveFlag_TC2(DMA1)) {
+        cntDMA1_2T++;
+        LL_DMA_ClearFlag_TC2(DMA1);
+    }
+    if (LL_DMA_IsActiveFlag_HT2(DMA1)) {
+        cntDMA1_2H++;
+        LL_DMA_ClearFlag_HT2(DMA1);
+    }
+    if (LL_DMA_IsActiveFlag_TE2(DMA1)) {
+        cntDMA1_2E++;
+        LL_DMA_ClearFlag_TE2(DMA1);
+    }
+    cntDMA1_2O++;
+  /* USER CODE END DMA1_Channel2_IRQn 0 */
+  /* USER CODE BEGIN DMA1_Channel2_IRQn 1 */
+
+  /* USER CODE END DMA1_Channel2_IRQn 1 */
+}
+
 /* USER CODE BEGIN 1 */
 
 /* USER CODE END 1 */

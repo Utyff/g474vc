@@ -47,7 +47,7 @@ void mainInitialize() {
     // ADC_start();
 
     GEN_setParams();
-    // DAC_startSin();
+    DAC_startSin();
 }
 
 u32 ticks = 0;
