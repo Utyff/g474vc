@@ -22,6 +22,8 @@
 #include "stm32g4xx_it.h"
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#include "adc.h"
+#include "dwt.h"
 #include "_main.h"
 /* USER CODE END Includes */
 
@@ -258,6 +260,38 @@ void DMA1_Channel2_IRQHandler(void)
   /* USER CODE BEGIN DMA1_Channel2_IRQn 1 */
 
   /* USER CODE END DMA1_Channel2_IRQn 1 */
+}
+
+/**
+  * @brief This function handles DMA2 channel1 global interrupt.
+  */
+void DMA2_Channel1_IRQHandler(void)
+{
+  /* USER CODE BEGIN DMA2_Channel1_IRQn 0 */
+    static uint32_t cntDMA2_1T = 0;
+    static uint32_t cntDMA2_1H = 0;
+    static uint32_t cntDMA2_1E = 0;
+    static uint32_t cntDMA2_1O = 0;
+
+    if (LL_DMA_IsActiveFlag_TC1(DMA2)) {
+        ADCworks = 0;
+        ADCElapsedTick = DWT_Get_Current_Tick() - ADCStartTick;
+        cntDMA2_1T++;
+        LL_DMA_ClearFlag_TC1(DMA2);
+    }
+    if (LL_DMA_IsActiveFlag_HT1(DMA2)) {
+        cntDMA2_1H++;
+        LL_DMA_ClearFlag_HT1(DMA2);
+    }
+    if (LL_DMA_IsActiveFlag_TE1(DMA2)) {
+        cntDMA2_1E++;
+        LL_DMA_ClearFlag_TE1(DMA2);
+    }
+    cntDMA2_1O++;
+  /* USER CODE END DMA2_Channel1_IRQn 0 */
+  /* USER CODE BEGIN DMA2_Channel1_IRQn 1 */
+
+  /* USER CODE END DMA2_Channel1_IRQn 1 */
 }
 
 /* USER CODE BEGIN 1 */

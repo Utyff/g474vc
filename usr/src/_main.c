@@ -43,8 +43,8 @@ void mainInitialize() {
     // LCD_Clear(BLACK);
     KEYS_init();
 
-    // ADCworks = 0;
-    // ADC_start();
+    ADCworks = 0;
+    ADC_start();
 
     GEN_setParams();
     DAC_startSin();
@@ -60,10 +60,10 @@ void mainCycle() {
     // getPoint(0, &touchPoint1);
     // getPoint(1, &touchPoint2);
 
-    // if (ADCworks == 0) {
+    if (ADCworks == 0) {
     //     drawScreen();
-    //     ADC_start();
-    // }
+        ADC_start();
+    }
 
     KEYS_scan();
 
