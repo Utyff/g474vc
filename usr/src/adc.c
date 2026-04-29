@@ -17,7 +17,7 @@ struct ADC_param {
 };
 typedef struct ADC_param ADC_PARAM;
 
-#define ADC_Parameters_Size  63
+#define ADC_Parameters_Size 6
 const ADC_PARAM ADC_Parameters[ADC_Parameters_Size] = {
         {LL_ADC_CLOCK_ASYNC_DIV1,  LL_ADC_SAMPLINGTIME_2CYCLES_5,  0.f},
         {LL_ADC_CLOCK_ASYNC_DIV1,  LL_ADC_SAMPLINGTIME_6CYCLES_5,  0.f},
@@ -54,8 +54,10 @@ void ADC_start() {
 
     ADC2_Init();
 
+    LL_ADC_ClearFlag_ADRDY(ADC2);
     LL_ADC_Enable(ADC2);
     while (!LL_ADC_IsActiveFlag_ADRDY(ADC2)) {}
+    LL_ADC_ClearFlag_ADRDY(ADC2);
 
     // Set DMA transfer addresses of source and destination
     LL_DMA_ConfigAddresses(DMA2, LL_DMA_CHANNEL_1,
@@ -77,9 +79,22 @@ void ADC_start() {
 
 static void ADC2_Init(void) {
 
-  LL_ADC_REG_StopConversion(ADC2);
-  LL_ADC_Disable(ADC2);
-  LL_ADC_Disable(ADC2);
+  if (LL_ADC_IsEnabled(ADC2)) {
+      LL_ADC_REG_StopConversion(ADC2);
+      while (LL_ADC_REG_IsConversionOngoing(ADC2)) {}
+
+      LL_ADC_Disable(ADC2);
+      while (LL_ADC_IsDisableOngoing(ADC2)) {}
+      while (LL_ADC_IsEnabled(ADC2)) {}
+
+      LL_ADC_DisableInternalRegulator(ADC2);
+      LL_mDelay(1);
+      LL_ADC_EnableDeepPowerDown(ADC2);
+      LL_mDelay(1);
+
+      LL_DMA_DisableChannel(DMA2, LL_DMA_CHANNEL_1);
+      LL_mDelay(1);
+  }
 
   // ADC2 DMA Init
   LL_DMA_SetPeriphRequest(DMA2, LL_DMA_CHANNEL_1, LL_DMAMUX_REQ_ADC2);
@@ -88,20 +103,45 @@ static void ADC2_Init(void) {
   LL_DMA_SetMode(DMA2, LL_DMA_CHANNEL_1, LL_DMA_MODE_NORMAL);
   LL_DMA_SetPeriphIncMode(DMA2, LL_DMA_CHANNEL_1, LL_DMA_PERIPH_NOINCREMENT);
   LL_DMA_SetMemoryIncMode(DMA2, LL_DMA_CHANNEL_1, LL_DMA_MEMORY_INCREMENT);
-  LL_DMA_SetPeriphSize(DMA2, LL_DMA_CHANNEL_1, LL_DMA_PDATAALIGN_HALFWORD);
-  LL_DMA_SetMemorySize(DMA2, LL_DMA_CHANNEL_1, LL_DMA_MDATAALIGN_HALFWORD);
+  LL_DMA_SetPeriphSize(DMA2, LL_DMA_CHANNEL_1, LL_DMA_PDATAALIGN_BYTE);
+  LL_DMA_SetMemorySize(DMA2, LL_DMA_CHANNEL_1, LL_DMA_MDATAALIGN_BYTE);
 
-  MODIFY_REG(ADC2->CFGR, ADC_CFGR_RES, LL_ADC_RESOLUTION_8B);
+  MODIFY_REG(ADC2->CFGR, ADC_CFGR_RES | ADC_CFGR_ALIGN | ADC_CFGR_AUTDLY,
+             LL_ADC_RESOLUTION_8B | LL_ADC_DATA_ALIGN_RIGHT | LL_ADC_LP_MODE_NONE);
   // Common config
-  MODIFY_REG(ADC12_COMMON->CCR,
-             ADC_CCR_CKMODE | ADC_CCR_PRESC | ADC_CCR_DUAL | ADC_CCR_MDMA | ADC_CCR_DELAY,
-             ADC_Prescaler | LL_ADC_MULTI_INDEPENDENT);
+  // MODIFY_REG(ADC12_COMMON->CCR,
+  //            ADC_CCR_CKMODE | ADC_CCR_PRESC | ADC_CCR_DUAL | ADC_CCR_MDMA | ADC_CCR_DELAY,
+  //            ADC_Prescaler | LL_ADC_MULTI_INDEPENDENT);
+  LL_ADC_REG_InitTypeDef ADC_REG_InitStruct = {0};
+  LL_ADC_CommonInitTypeDef ADC_CommonInitStruct = {0};
+  ADC_REG_InitStruct.TriggerSource = LL_ADC_REG_TRIG_SOFTWARE;
+  ADC_REG_InitStruct.SequencerLength = LL_ADC_REG_SEQ_SCAN_DISABLE;
+  ADC_REG_InitStruct.SequencerDiscont = LL_ADC_REG_SEQ_DISCONT_DISABLE;
+  ADC_REG_InitStruct.ContinuousMode = LL_ADC_REG_CONV_CONTINUOUS;
+  ADC_REG_InitStruct.DMATransfer = LL_ADC_REG_DMA_TRANSFER_UNLIMITED;
+  ADC_REG_InitStruct.Overrun = LL_ADC_REG_OVR_DATA_PRESERVED;
+  LL_ADC_REG_Init(ADC2, &ADC_REG_InitStruct);
+  LL_ADC_SetGainCompensation(ADC2, 0);
+  LL_ADC_SetOverSamplingScope(ADC2, LL_ADC_OVS_DISABLE);
+  ADC_CommonInitStruct.CommonClock = ADC_Prescaler;
+  LL_ADC_CommonInit(__LL_ADC_COMMON_INSTANCE(ADC2), &ADC_CommonInitStruct);
 
   /* Disable ADC deep power down (enabled by default after reset state) */
   LL_ADC_DisableDeepPowerDown(ADC2);
   /* Enable ADC internal voltage regulator */
   LL_ADC_EnableInternalRegulator(ADC2);
-  LL_mDelay(LL_ADC_DELAY_INTERNAL_REGUL_STAB_US);
+  /* Delay for ADC internal voltage regulator stabilization. */
+  /* Compute number of CPU cycles to wait for, from delay in us. */
+  /* Note: Variable divided by 2 to compensate partially */
+  /* CPU processing cycles (depends on compilation optimization). */
+  /* Note: If system core clock frequency is below 200kHz, wait time */
+  /* is only a few CPU processing cycles. */
+  uint32_t wait_loop_index;
+  wait_loop_index = ((LL_ADC_DELAY_INTERNAL_REGUL_STAB_US * (SystemCoreClock / (100000 * 2))) / 10);
+  while(wait_loop_index != 0)
+  {
+      wait_loop_index--;
+  }
 
   // Configure Regular Channel
   LL_ADC_REG_SetSequencerRanks(ADC2, LL_ADC_REG_RANK_1, LL_ADC_CHANNEL_3);

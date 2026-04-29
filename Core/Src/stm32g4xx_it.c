@@ -268,7 +268,7 @@ void DMA1_Channel2_IRQHandler(void)
 void DMA2_Channel1_IRQHandler(void)
 {
   /* USER CODE BEGIN DMA2_Channel1_IRQn 0 */
-    static uint32_t cntDMA2_1T = 0;
+    static uint32_t cntDMA2_1C = 0;
     static uint32_t cntDMA2_1H = 0;
     static uint32_t cntDMA2_1E = 0;
     static uint32_t cntDMA2_1O = 0;
@@ -276,7 +276,7 @@ void DMA2_Channel1_IRQHandler(void)
     if (LL_DMA_IsActiveFlag_TC1(DMA2)) {
         ADCworks = 0;
         ADCElapsedTick = DWT_Get_Current_Tick() - ADCStartTick;
-        cntDMA2_1T++;
+        cntDMA2_1C++;
         LL_DMA_ClearFlag_TC1(DMA2);
     }
     if (LL_DMA_IsActiveFlag_HT1(DMA2)) {
