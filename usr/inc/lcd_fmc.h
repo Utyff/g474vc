@@ -2,7 +2,6 @@
 #define _LCD_FMC_H
 
 #include "_main.h"
-#include <dwt.h>
 
 //----------------- LCD port definition ----------------
 // LCD address structure

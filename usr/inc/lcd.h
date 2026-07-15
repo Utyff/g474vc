@@ -10,8 +10,8 @@
 // begin to write the GRAM command
 #define LCD_WR_RAM_CMD 0x2c
 
-#define MAX_X 480
-#define MAX_Y 320
+#define SIZE_X 480
+#define SIZE_Y 320
 
 // LCD important parameter set
 typedef struct {

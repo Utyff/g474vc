@@ -39,8 +39,7 @@ void mainInitialize() {
     FPUCheck();
 
     DWT_Init();
-    // LCD_Init();
-    // LCD_Clear(BLACK);
+    LCD_Init();
     KEYS_init();
 
     ADCworks = 0;
