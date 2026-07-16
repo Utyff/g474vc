@@ -10,15 +10,14 @@
 #define CONV_TICS 8.5f
 
 // Recommended ADC clock = 60mHz Max = 170mHz :)
-struct ADC_param {
+typedef struct ADC_param {
     uint32_t ADC_Prescaler;
     uint32_t ADC_SampleCycles;
     float SampleTime;    // microseconds
-};
-typedef struct ADC_param ADC_PARAM;
+} ADC_PARAM;
 
 #define ADC_Parameters_Size 6
-const ADC_PARAM ADC_Parameters[ADC_Parameters_Size] = {
+static const ADC_PARAM ADC_Parameters[ADC_Parameters_Size] = {
         {LL_ADC_CLOCK_ASYNC_DIV1,  LL_ADC_SAMPLINGTIME_2CYCLES_5,  0.f},
         {LL_ADC_CLOCK_ASYNC_DIV1,  LL_ADC_SAMPLINGTIME_6CYCLES_5,  0.f},
         {LL_ADC_CLOCK_ASYNC_DIV2,  LL_ADC_SAMPLINGTIME_2CYCLES_5,  0.f},
@@ -42,7 +41,7 @@ uint32_t ADCHalfElapsedTick;   // the last time half buffer fill
 uint32_t ADCElapsedTick;       // the last time buffer fill
 
 static void ADC2_Init(void);
-float ADC_calcSampleTime();
+static float ADC_calcSampleTime();
 
 
 void ADC_start() {
@@ -76,24 +75,22 @@ void ADC_start() {
     ADCStartTick = DWT_Get_Current_Tick();
 }
 
+static void ADC_stop() {
+    LL_ADC_REG_StopConversion(ADC2);
+    while (LL_ADC_REG_IsConversionOngoing(ADC2)) {}
+
+    LL_ADC_Disable(ADC2);
+    while (LL_ADC_IsDisableOngoing(ADC2)) {}
+    while (LL_ADC_IsEnabled(ADC2)) {}
+
+    LL_DMA_DisableChannel(DMA2, LL_DMA_CHANNEL_1);
+    LL_mDelay(1);
+}
 
 static void ADC2_Init(void) {
 
   if (LL_ADC_IsEnabled(ADC2)) {
-      LL_ADC_REG_StopConversion(ADC2);
-      while (LL_ADC_REG_IsConversionOngoing(ADC2)) {}
-
-      LL_ADC_Disable(ADC2);
-      while (LL_ADC_IsDisableOngoing(ADC2)) {}
-      while (LL_ADC_IsEnabled(ADC2)) {}
-
-      LL_ADC_DisableInternalRegulator(ADC2);
-      LL_mDelay(1);
-      LL_ADC_EnableDeepPowerDown(ADC2);
-      LL_mDelay(1);
-
-      LL_DMA_DisableChannel(DMA2, LL_DMA_CHANNEL_1);
-      LL_mDelay(1);
+      ADC_stop();
   }
 
   // ADC2 DMA Init
@@ -108,10 +105,7 @@ static void ADC2_Init(void) {
 
   MODIFY_REG(ADC2->CFGR, ADC_CFGR_RES | ADC_CFGR_ALIGN | ADC_CFGR_AUTDLY,
              LL_ADC_RESOLUTION_8B | LL_ADC_DATA_ALIGN_RIGHT | LL_ADC_LP_MODE_NONE);
-  // Common config
-  // MODIFY_REG(ADC12_COMMON->CCR,
-  //            ADC_CCR_CKMODE | ADC_CCR_PRESC | ADC_CCR_DUAL | ADC_CCR_MDMA | ADC_CCR_DELAY,
-  //            ADC_Prescaler | LL_ADC_MULTI_INDEPENDENT);
+
   LL_ADC_REG_InitTypeDef ADC_REG_InitStruct = {0};
   LL_ADC_CommonInitTypeDef ADC_CommonInitStruct = {0};
   ADC_REG_InitStruct.TriggerSource = LL_ADC_REG_TRIG_SOFTWARE;
@@ -125,23 +119,6 @@ static void ADC2_Init(void) {
   LL_ADC_SetOverSamplingScope(ADC2, LL_ADC_OVS_DISABLE);
   ADC_CommonInitStruct.CommonClock = ADC_Prescaler;
   LL_ADC_CommonInit(__LL_ADC_COMMON_INSTANCE(ADC2), &ADC_CommonInitStruct);
-
-  /* Disable ADC deep power down (enabled by default after reset state) */
-  LL_ADC_DisableDeepPowerDown(ADC2);
-  /* Enable ADC internal voltage regulator */
-  LL_ADC_EnableInternalRegulator(ADC2);
-  /* Delay for ADC internal voltage regulator stabilization. */
-  /* Compute number of CPU cycles to wait for, from delay in us. */
-  /* Note: Variable divided by 2 to compensate partially */
-  /* CPU processing cycles (depends on compilation optimization). */
-  /* Note: If system core clock frequency is below 200kHz, wait time */
-  /* is only a few CPU processing cycles. */
-  uint32_t wait_loop_index;
-  wait_loop_index = ((LL_ADC_DELAY_INTERNAL_REGUL_STAB_US * (SystemCoreClock / (100000 * 2))) / 10);
-  while(wait_loop_index != 0)
-  {
-      wait_loop_index--;
-  }
 
   // Configure Regular Channel
   LL_ADC_REG_SetSequencerRanks(ADC2, LL_ADC_REG_RANK_1, LL_ADC_CHANNEL_3);
