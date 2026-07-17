@@ -1,7 +1,7 @@
 #THIS FILE IS AUTO GENERATED FROM THE TEMPLATE! DO NOT CHANGE!
 set(CMAKE_SYSTEM_NAME Generic)
 set(CMAKE_SYSTEM_VERSION 1)
-cmake_minimum_required(VERSION 4.2)
+cmake_minimum_required(VERSION 4.3)
 
 # specify cross-compilers and tools
 set(CMAKE_C_COMPILER arm-none-eabi-gcc)
@@ -46,7 +46,7 @@ add_compile_options($<$<COMPILE_LANGUAGE:ASM>:-x$<SEMICOLON>assembler-with-cpp>)
 #    add_compile_options(-Os)
 #else ()
     message(STATUS "Minimal optimization, debug info included")
-    add_compile_options(-O0 -g)
+    add_compile_options(-Og -g)
 #endif ()
 
 include_directories(usr/inc Core/Inc Drivers/STM32G4xx_HAL_Driver/Inc Drivers/CMSIS/Device/ST/STM32G4xx/Include Drivers/CMSIS/Include)
