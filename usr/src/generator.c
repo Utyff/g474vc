@@ -2,12 +2,12 @@
 #include <_main.h>
 #include "generator.h"
 
-/* H7
+/* G4
  * TIM1 Configuration
- * CLK  - 400 mHz
- * AHB2 - 200 mHz
- * PRE           100 - 1 => 2 MHz
- * COUNT PERIOD  100 - 1 => 20 KHz
+ * CLK  - 170 mHz
+ * AHB2 - 170 mHz
+ * PRE           100 - 1 => 1.7 MHz
+ * COUNT PERIOD  100 - 1 => 17 KHz
  */
 
 struct GEN_param {
@@ -17,41 +17,46 @@ struct GEN_param {
 };
 typedef struct GEN_param GEN_PARAM;
 
-#define GEN_Parameters_Size 26
-const GEN_PARAM GEN_Parameters[GEN_Parameters_Size] = {
-        {0, 19, 10000000},
-        {0, 24, 8000000},
-        {0, 32, 6060606},
-        {0, 49, 4000000},
-        {0, 99, 2000000},
-        {9, 19, 1000000},
-        {9, 24, 800000},
-        {8, 36, 600600},
-        {9, 49, 400000},
-        {9, 99, 200000},
-        {99, 19, 100000},
-        {99, 24, 80000},
-        {32, 100, 60006},
-        {99, 49, 40000},
-        {99, 99, 20000},
-        {999, 19, 10000},
-        {999, 24, 8000},
-        {329, 100, 6000},
-        {999, 49, 4000},
-        {999, 99, 2000},
-        {9999, 19, 1000},
-        {9999, 24, 800},
-        {3299, 100, 600},
-        {9999, 49, 400},
-        {9999, 99, 200},
-        {9999, 199, 100}
+#define GEN_Parameters_Size 31
+static const GEN_PARAM GEN_Parameters[GEN_Parameters_Size] = {
+    {0, 16, 10000000},
+    {0, 20, 8095238},
+    {0, 27, 6071429},
+    {0, 41, 4047619},
+    {0, 84, 2000000},
+    {9, 16, 1000000},
+    {0, 211, 801887},
+    {0, 282, 600707},
+    {0, 424, 400000},
+    {9, 84, 200000},
+    {99, 16, 100000},
+    {0, 2124, 80000},
+    {0, 2832, 60007},
+    {9, 424, 40000},
+    {99, 84, 20000},
+    {999, 16, 10000},
+    {9, 2124, 8000},
+    {0, 28332, 6000},
+    {99, 424, 4000},
+    {999, 84, 2000},
+    {9999, 16, 1000},
+    {99, 2124, 800},
+    {9, 28332, 600},
+    {999, 424, 400},
+    {9999, 84, 200},
+    {9999, 169, 100},
+    {999, 2124, 80},
+    {99, 28332, 60},
+    {999, 4249, 40},
+    {9999, 849, 20},
+    {9999, 1699, 10}
 };
 
-uint32_t currentGenParam = 9;
-uint32_t tim1Prescaler = 9;
-uint32_t tim1Period = 99;
-uint32_t tim1Pulse = 40;
-uint32_t tim1Freq = 0;
+uint32_t currentGenParam = 0;
+uint32_t tim1Prescaler;
+uint32_t tim1Period;
+uint32_t tim1Pulse;
+uint32_t tim1Freq;
 
 void GEN_step(int16_t step) {
     char msg[200];
@@ -87,6 +92,5 @@ void GEN_setParams() {
     LL_TIM_CC_EnableChannel(TIM1, LL_TIM_CHANNEL_CH1);
     // Enable the TIM main Output
     LL_TIM_EnableAllOutputs(TIM1);
-    // Enable counter
     LL_TIM_EnableCounter(TIM1);
 }

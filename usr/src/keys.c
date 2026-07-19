@@ -68,14 +68,14 @@ void KEYS_scan() {
     char buf[64];
     sprintf(buf, "step: %hi\n", step);
     DBG_Trace(buf);
-/*
+
     // choose type of encoder action
     uint8_t action = button1Count % MAX_ACTIONS;
     if (action == 0) {
         ADC_step(step);
     } else if (action == 1) {
         GEN_step(step);
-    } else {
+    } /*else {
         DAC_NextGeneratorSignal();
     } //*/
 }
