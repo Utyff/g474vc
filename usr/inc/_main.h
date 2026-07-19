@@ -21,8 +21,6 @@ void mainInitialize();
 
 void mainCycle();
 
-void UART_Transmit(const char *msg);
-
 #define DEBUG_TRACE_UART
 
 #if defined(DEBUG_TRACE_SWO)
@@ -33,6 +31,7 @@ void SWO_Trace(uint8_t* msg);
 #elif defined(DEBUG_TRACE_UART)
 
 #include "string.h"
+void UART_Transmit(const char *msg);
 
 #define DBG_Trace(msg) UART_Transmit(msg)
 

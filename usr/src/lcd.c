@@ -162,7 +162,7 @@ void LCD_Init(void) {
     LCD_Init_sequence();
 
     LCD_Display_Dir(1);  // default to portrait
-    LCD_Clear(GREEN);
+    LCD_Clear(BLACK);
 }
 
 void LCD_Init_sequence() {

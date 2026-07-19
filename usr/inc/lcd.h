@@ -12,6 +12,8 @@
 
 #define SIZE_X 480
 #define SIZE_Y 320
+#define MAX_X SIZE_X
+#define MAX_Y SIZE_Y
 
 // LCD important parameter set
 typedef struct {

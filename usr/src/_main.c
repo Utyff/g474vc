@@ -60,26 +60,27 @@ void mainCycle() {
     // getPoint(1, &touchPoint2);
 
     if (ADCworks == 0) {
-    //     drawScreen();
+        drawScreen();
         ADC_start();
     }
 
     KEYS_scan();
 
-    // POINT_COLOR = CYAN;
-    // BACK_COLOR = CLR_BACKGROUND;
-    // LCD_ShowxNum(0, LINE1_Y, TIM8->CNT, 5, 12, 0x0);
-    // LCD_ShowxNum(30, LINE1_Y, button1Count, 5, 12, 0x0);
-    // LCD_ShowxNum(80, LINE1_Y, tim1Freq, 8, 12, 0x0);
-    // LCD_ShowxNum(90, LINE2_Y, (u32) ADC_MeasureTime * FRAME_STEP, 7, 12, 0x0);
-    // LCD_ShowxNum(120, LINE2_Y, (u32) ADC_param, 5, 12, 0x0);
+    POINT_COLOR = CYAN;
+    BACK_COLOR = CLR_BACKGROUND;
+    LCD_ShowxNum(0, LINE1_Y, TIM8->CNT, 5, 12, 0x0);
+    LCD_ShowxNum(30, LINE1_Y, button1Count, 5, 12, 0x0);
+    LCD_ShowxNum(80, LINE1_Y, tim1Freq, 8, 12, 0x0);
+    LCD_ShowxNum(90, LINE2_Y, (u32) ADC_MeasureTime * FRAME_STEP, 7, 12, 0x0);
+    LCD_ShowxNum(120, LINE2_Y, (u32) ADC_param, 5, 12, 0x0);
 
-    // POINT_COLOR = MAGENTA;
-    // LCD_ShowxNum(200,  LINE2_Y, ADCElapsedTick, 10, 12, 0x0);
+    POINT_COLOR = MAGENTA;
+    LCD_ShowxNum(200,  LINE2_Y, ADCElapsedTick, 10, 12, 0x0);
 
     delay_ms(30);
 }
 
+#ifdef DEBUG_TRACE_UART
 void UART_Transmit(const char *msg) {
     static char __ALIGNED(4) txBuffer[250];
     const uint32_t txBufferSize = strlen(msg);
@@ -88,7 +89,6 @@ void UART_Transmit(const char *msg) {
     DMA1_0_busy = 1;
 
     stpcpy(txBuffer, msg);
-    // SCB_CleanDCache_by_Addr((uint32_t*)txBuffer, txBufferSize);
 
     LL_DMA_DisableChannel(DMA1, LL_DMA_CHANNEL_1);
     // Channel 1 = TX
@@ -105,6 +105,7 @@ void UART_Transmit(const char *msg) {
     LL_USART_EnableDMAReq_TX(USART1);
     LL_USART_EnableDirectionTx(USART1);
 }
+#endif
 
 #ifdef DEBUG_TRACE_SWO
 
