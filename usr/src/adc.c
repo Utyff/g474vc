@@ -148,13 +148,13 @@ static void ADC_stop() {
 
     if (LL_ADC_IsEnabled(ADC1)) {
         LL_ADC_Disable(ADC1);
-        while (LL_ADC_IsDisableOngoing(ADC1)) {}
+        // while (LL_ADC_IsDisableOngoing(ADC1)) {}
         while (LL_ADC_IsEnabled(ADC1)) {}
     }
 
     if (LL_ADC_IsEnabled(ADC2)) {
         LL_ADC_Disable(ADC2);
-        while (LL_ADC_IsDisableOngoing(ADC2)) {}
+        // while (LL_ADC_IsDisableOngoing(ADC2)) {}
         while (LL_ADC_IsEnabled(ADC2)) {}
     }
 }
