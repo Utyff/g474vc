@@ -71,7 +71,7 @@ void mainCycle() {
     LCD_ShowxNum(0, LINE1_Y, TIM8->CNT, 5, 12, 0x0);
     LCD_ShowxNum(30, LINE1_Y, button1Count, 5, 12, 0x0);
     LCD_ShowxNum(80, LINE1_Y, tim1Freq, 8, 12, 0x0);
-    LCD_ShowxNum(90, LINE2_Y, (u32) ADC_MeasureTime * FRAME_STEP, 7, 12, 0x0);
+    LCD_ShowxNum(50, LINE2_Y, (u32) ADC_MeasureTime * FRAME_STEP, 7, 12, 0x0);
     LCD_ShowxNum(120, LINE2_Y, (u32) ADC_param, 5, 12, 0x0);
 
     POINT_COLOR = MAGENTA;
@@ -88,7 +88,7 @@ void UART_Transmit(const char *msg) {
     while (DMA1_0_busy){}
     DMA1_0_busy = 1;
 
-    stpcpy(txBuffer, msg);
+    strcpy(txBuffer, msg);
 
     LL_DMA_DisableChannel(DMA1, LL_DMA_CHANNEL_1);
     // Channel 1 = TX
