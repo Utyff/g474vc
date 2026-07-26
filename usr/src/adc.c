@@ -145,6 +145,7 @@ void ADC_start() {
 static void ADC_stop() {
     LL_ADC_REG_StopConversion(ADC1);
     while (LL_ADC_REG_IsConversionOngoing(ADC1)) {}
+    LL_ADC_ClearFlag_EOS(ADC1);
 
     if (LL_ADC_IsEnabled(ADC1)) {
         LL_ADC_Disable(ADC1);
