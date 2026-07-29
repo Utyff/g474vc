@@ -4,7 +4,8 @@
 #include "adc.h"
 
 // ADC clock freq (Hz)
-#define ADC_CLOCK 68000000.f
+// MAX ADC clock: DS recommended - 60 MHz, works - 113.3 MHz
+#define ADC_CLOCK 113333333.f
 // RM0440 page 633
 // 8 bit. TSAR timings depending on resolution
 #define CONV_TICS 8.5f
@@ -237,7 +238,7 @@ void ADC_step(int16_t step) {
     ADC_MeasureTime = ADC_calcSampleTime();
 }
 
-// return time for 1 measuring. (ns)
+// Sample time (ns)
 float ADC_calcSampleTime() {
     float presc = 0;
     float sampling = 0;
@@ -312,5 +313,6 @@ float ADC_calcSampleTime() {
             Error_Handler();
     }
 
-    return (CONV_TICS + sampling) * 1 / (ADC_CLOCK / presc / 1000000.f) * 1000.f / 2.f;
+    // Sample time (ns). Interleave mode.
+    return (CONV_TICS + sampling) *1000000000.f / 2 / (ADC_CLOCK / presc);
 }
