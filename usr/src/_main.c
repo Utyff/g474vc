@@ -4,7 +4,7 @@
 #include <delay.h>
 #include <draw.h>
 #include <keys.h>
-#include <DataBuffer.h>
+#include <lcd.h>
 #include <generator.h>
 #include <adc.h>
 #include <dac.h>

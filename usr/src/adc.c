@@ -4,90 +4,103 @@
 #include "adc.h"
 
 // ADC clock freq (Hz)
-// MAX ADC clock: DS recommended - 60 MHz, works - 113.3 MHz
+// ADC clock: DS recommended - 60 MHz, works MAX - 113.3 MHz
 #define ADC_CLOCK 113333333.f
 // RM0440 page 633
 // 8 bit. TSAR timings depending on resolution
 #define CONV_TICS 8.5f
 
-// Recommended ADC clock = 60mHz Max = 170mHz :)
-typedef struct ADC_param {
+typedef struct {
     uint32_t ADC_Prescaler;
     uint32_t ADC_SampleCycles;
-    float SampleTime; // microseconds
 } ADC_PARAM;
 
 #define ADC_Parameters_Size 63
 static const ADC_PARAM ADC_Parameters[ADC_Parameters_Size] = {
-    {LL_ADC_CLOCK_ASYNC_DIV1, LL_ADC_SAMPLINGTIME_2CYCLES_5, 0.f},
-    {LL_ADC_CLOCK_ASYNC_DIV1, LL_ADC_SAMPLINGTIME_6CYCLES_5, 0.f},
-    {LL_ADC_CLOCK_ASYNC_DIV1, LL_ADC_SAMPLINGTIME_12CYCLES_5, 0.f},
-    {LL_ADC_CLOCK_ASYNC_DIV2, LL_ADC_SAMPLINGTIME_2CYCLES_5, 0.f},
-    {LL_ADC_CLOCK_ASYNC_DIV2, LL_ADC_SAMPLINGTIME_6CYCLES_5, 0.f},
-    {LL_ADC_CLOCK_ASYNC_DIV1, LL_ADC_SAMPLINGTIME_24CYCLES_5, 0.f},
-    {LL_ADC_CLOCK_ASYNC_DIV2, LL_ADC_SAMPLINGTIME_12CYCLES_5, 0.f},
-    {LL_ADC_CLOCK_ASYNC_DIV4, LL_ADC_SAMPLINGTIME_2CYCLES_5, 0.f},
-    {LL_ADC_CLOCK_ASYNC_DIV1, LL_ADC_SAMPLINGTIME_47CYCLES_5, 0.f},
-    {LL_ADC_CLOCK_ASYNC_DIV4, LL_ADC_SAMPLINGTIME_6CYCLES_5, 0.f},
-    {LL_ADC_CLOCK_ASYNC_DIV2, LL_ADC_SAMPLINGTIME_24CYCLES_5, 0.f},
-    {LL_ADC_CLOCK_ASYNC_DIV6, LL_ADC_SAMPLINGTIME_2CYCLES_5, 0.f},
-    {LL_ADC_CLOCK_ASYNC_DIV4, LL_ADC_SAMPLINGTIME_12CYCLES_5, 0.f},
-    {LL_ADC_CLOCK_ASYNC_DIV8, LL_ADC_SAMPLINGTIME_2CYCLES_5, 0.f},
-    {LL_ADC_CLOCK_ASYNC_DIV6, LL_ADC_SAMPLINGTIME_6CYCLES_5, 0.f},
-    {LL_ADC_CLOCK_ASYNC_DIV1, LL_ADC_SAMPLINGTIME_92CYCLES_5, 0.f},
-    {LL_ADC_CLOCK_ASYNC_DIV10, LL_ADC_SAMPLINGTIME_2CYCLES_5, 0.f},
-    {LL_ADC_CLOCK_ASYNC_DIV2, LL_ADC_SAMPLINGTIME_47CYCLES_5, 0.f},
-    {LL_ADC_CLOCK_ASYNC_DIV8, LL_ADC_SAMPLINGTIME_6CYCLES_5, 0.f},
-    {LL_ADC_CLOCK_ASYNC_DIV6, LL_ADC_SAMPLINGTIME_12CYCLES_5, 0.f},
-    {LL_ADC_CLOCK_ASYNC_DIV4, LL_ADC_SAMPLINGTIME_24CYCLES_5, 0.f},
-    {LL_ADC_CLOCK_ASYNC_DIV12, LL_ADC_SAMPLINGTIME_2CYCLES_5, 0.f},
-    {LL_ADC_CLOCK_ASYNC_DIV10, LL_ADC_SAMPLINGTIME_6CYCLES_5, 0.f},
-    {LL_ADC_CLOCK_ASYNC_DIV8, LL_ADC_SAMPLINGTIME_12CYCLES_5, 0.f},
-    {LL_ADC_CLOCK_ASYNC_DIV16, LL_ADC_SAMPLINGTIME_2CYCLES_5, 0.f},
-    {LL_ADC_CLOCK_ASYNC_DIV12, LL_ADC_SAMPLINGTIME_6CYCLES_5, 0.f},
-    {LL_ADC_CLOCK_ASYNC_DIV6, LL_ADC_SAMPLINGTIME_24CYCLES_5, 0.f},
-    {LL_ADC_CLOCK_ASYNC_DIV2, LL_ADC_SAMPLINGTIME_92CYCLES_5, 0.f},
-    {LL_ADC_CLOCK_ASYNC_DIV10, LL_ADC_SAMPLINGTIME_12CYCLES_5, 0.f},
-    {LL_ADC_CLOCK_ASYNC_DIV4, LL_ADC_SAMPLINGTIME_47CYCLES_5, 0.f},
-    {LL_ADC_CLOCK_ASYNC_DIV16, LL_ADC_SAMPLINGTIME_6CYCLES_5, 0.f},
-    {LL_ADC_CLOCK_ASYNC_DIV12, LL_ADC_SAMPLINGTIME_12CYCLES_5, 0.f},
-    {LL_ADC_CLOCK_ASYNC_DIV1, LL_ADC_SAMPLINGTIME_247CYCLES_5, 0.f},
-    {LL_ADC_CLOCK_ASYNC_DIV8, LL_ADC_SAMPLINGTIME_24CYCLES_5, 0.f},
-    {LL_ADC_CLOCK_ASYNC_DIV10, LL_ADC_SAMPLINGTIME_24CYCLES_5, 0.f},
-    {LL_ADC_CLOCK_ASYNC_DIV16, LL_ADC_SAMPLINGTIME_12CYCLES_5, 0.f},
-    {LL_ADC_CLOCK_ASYNC_DIV6, LL_ADC_SAMPLINGTIME_47CYCLES_5, 0.f},
-    {LL_ADC_CLOCK_ASYNC_DIV32, LL_ADC_SAMPLINGTIME_2CYCLES_5, 0.f},
-    {LL_ADC_CLOCK_ASYNC_DIV12, LL_ADC_SAMPLINGTIME_24CYCLES_5, 0.f},
-    {LL_ADC_CLOCK_ASYNC_DIV4, LL_ADC_SAMPLINGTIME_92CYCLES_5, 0.f},
-    {LL_ADC_CLOCK_ASYNC_DIV8, LL_ADC_SAMPLINGTIME_47CYCLES_5, 0.f},
-    {LL_ADC_CLOCK_ASYNC_DIV32, LL_ADC_SAMPLINGTIME_6CYCLES_5, 0.f},
-    {LL_ADC_CLOCK_ASYNC_DIV2, LL_ADC_SAMPLINGTIME_247CYCLES_5, 0.f},
-    {LL_ADC_CLOCK_ASYNC_DIV16, LL_ADC_SAMPLINGTIME_24CYCLES_5, 0.f},
-    {LL_ADC_CLOCK_ASYNC_DIV10, LL_ADC_SAMPLINGTIME_47CYCLES_5, 0.f},
-    {LL_ADC_CLOCK_ASYNC_DIV6, LL_ADC_SAMPLINGTIME_92CYCLES_5, 0.f},
-    {LL_ADC_CLOCK_ASYNC_DIV32, LL_ADC_SAMPLINGTIME_12CYCLES_5, 0.f},
-    {LL_ADC_CLOCK_ASYNC_DIV12, LL_ADC_SAMPLINGTIME_47CYCLES_5, 0.f},
-    {LL_ADC_CLOCK_ASYNC_DIV8, LL_ADC_SAMPLINGTIME_92CYCLES_5, 0.f},
-    {LL_ADC_CLOCK_ASYNC_DIV16, LL_ADC_SAMPLINGTIME_47CYCLES_5, 0.f},
-    {LL_ADC_CLOCK_ASYNC_DIV10, LL_ADC_SAMPLINGTIME_92CYCLES_5, 0.f},
-    {LL_ADC_CLOCK_ASYNC_DIV4, LL_ADC_SAMPLINGTIME_247CYCLES_5, 0.f},
-    {LL_ADC_CLOCK_ASYNC_DIV32, LL_ADC_SAMPLINGTIME_24CYCLES_5, 0.f},
-    {LL_ADC_CLOCK_ASYNC_DIV12, LL_ADC_SAMPLINGTIME_92CYCLES_5, 0.f},
-    {LL_ADC_CLOCK_ASYNC_DIV6, LL_ADC_SAMPLINGTIME_247CYCLES_5, 0.f},
-    {LL_ADC_CLOCK_ASYNC_DIV16, LL_ADC_SAMPLINGTIME_92CYCLES_5, 0.f},
-    {LL_ADC_CLOCK_ASYNC_DIV32, LL_ADC_SAMPLINGTIME_47CYCLES_5, 0.f},
-    {LL_ADC_CLOCK_ASYNC_DIV8, LL_ADC_SAMPLINGTIME_247CYCLES_5, 0.f},
-    {LL_ADC_CLOCK_ASYNC_DIV10, LL_ADC_SAMPLINGTIME_247CYCLES_5, 0.f},
-    {LL_ADC_CLOCK_ASYNC_DIV12, LL_ADC_SAMPLINGTIME_247CYCLES_5, 0.f},
-    {LL_ADC_CLOCK_ASYNC_DIV32, LL_ADC_SAMPLINGTIME_92CYCLES_5, 0.f},
-    {LL_ADC_CLOCK_ASYNC_DIV16, LL_ADC_SAMPLINGTIME_247CYCLES_5, 0.f},
-    {LL_ADC_CLOCK_ASYNC_DIV32, LL_ADC_SAMPLINGTIME_247CYCLES_5, 0.f}
+    {LL_ADC_CLOCK_ASYNC_DIV1, LL_ADC_SAMPLINGTIME_2CYCLES_5},
+    {LL_ADC_CLOCK_ASYNC_DIV1, LL_ADC_SAMPLINGTIME_6CYCLES_5},
+    {LL_ADC_CLOCK_ASYNC_DIV1, LL_ADC_SAMPLINGTIME_12CYCLES_5},
+    {LL_ADC_CLOCK_ASYNC_DIV2, LL_ADC_SAMPLINGTIME_2CYCLES_5},
+    {LL_ADC_CLOCK_ASYNC_DIV2, LL_ADC_SAMPLINGTIME_6CYCLES_5},
+    {LL_ADC_CLOCK_ASYNC_DIV1, LL_ADC_SAMPLINGTIME_24CYCLES_5},
+    {LL_ADC_CLOCK_ASYNC_DIV2, LL_ADC_SAMPLINGTIME_12CYCLES_5},
+    {LL_ADC_CLOCK_ASYNC_DIV4, LL_ADC_SAMPLINGTIME_2CYCLES_5},
+    {LL_ADC_CLOCK_ASYNC_DIV1, LL_ADC_SAMPLINGTIME_47CYCLES_5},
+    {LL_ADC_CLOCK_ASYNC_DIV4, LL_ADC_SAMPLINGTIME_6CYCLES_5},
+    {LL_ADC_CLOCK_ASYNC_DIV2, LL_ADC_SAMPLINGTIME_24CYCLES_5},
+    {LL_ADC_CLOCK_ASYNC_DIV6, LL_ADC_SAMPLINGTIME_2CYCLES_5},
+    {LL_ADC_CLOCK_ASYNC_DIV4, LL_ADC_SAMPLINGTIME_12CYCLES_5},
+    {LL_ADC_CLOCK_ASYNC_DIV8, LL_ADC_SAMPLINGTIME_2CYCLES_5},
+    {LL_ADC_CLOCK_ASYNC_DIV6, LL_ADC_SAMPLINGTIME_6CYCLES_5},
+    {LL_ADC_CLOCK_ASYNC_DIV1, LL_ADC_SAMPLINGTIME_92CYCLES_5},
+    {LL_ADC_CLOCK_ASYNC_DIV10, LL_ADC_SAMPLINGTIME_2CYCLES_5},
+    {LL_ADC_CLOCK_ASYNC_DIV2, LL_ADC_SAMPLINGTIME_47CYCLES_5},
+    {LL_ADC_CLOCK_ASYNC_DIV8, LL_ADC_SAMPLINGTIME_6CYCLES_5},
+    {LL_ADC_CLOCK_ASYNC_DIV6, LL_ADC_SAMPLINGTIME_12CYCLES_5},
+    {LL_ADC_CLOCK_ASYNC_DIV4, LL_ADC_SAMPLINGTIME_24CYCLES_5},
+    {LL_ADC_CLOCK_ASYNC_DIV12, LL_ADC_SAMPLINGTIME_2CYCLES_5},
+    {LL_ADC_CLOCK_ASYNC_DIV10, LL_ADC_SAMPLINGTIME_6CYCLES_5},
+    {LL_ADC_CLOCK_ASYNC_DIV8, LL_ADC_SAMPLINGTIME_12CYCLES_5},
+    {LL_ADC_CLOCK_ASYNC_DIV16, LL_ADC_SAMPLINGTIME_2CYCLES_5},
+    {LL_ADC_CLOCK_ASYNC_DIV12, LL_ADC_SAMPLINGTIME_6CYCLES_5},
+    {LL_ADC_CLOCK_ASYNC_DIV6, LL_ADC_SAMPLINGTIME_24CYCLES_5},
+    {LL_ADC_CLOCK_ASYNC_DIV2, LL_ADC_SAMPLINGTIME_92CYCLES_5},
+    {LL_ADC_CLOCK_ASYNC_DIV10, LL_ADC_SAMPLINGTIME_12CYCLES_5},
+    {LL_ADC_CLOCK_ASYNC_DIV4, LL_ADC_SAMPLINGTIME_47CYCLES_5},
+    {LL_ADC_CLOCK_ASYNC_DIV16, LL_ADC_SAMPLINGTIME_6CYCLES_5},
+    {LL_ADC_CLOCK_ASYNC_DIV12, LL_ADC_SAMPLINGTIME_12CYCLES_5},
+    {LL_ADC_CLOCK_ASYNC_DIV1, LL_ADC_SAMPLINGTIME_247CYCLES_5},
+    {LL_ADC_CLOCK_ASYNC_DIV8, LL_ADC_SAMPLINGTIME_24CYCLES_5},
+    {LL_ADC_CLOCK_ASYNC_DIV10, LL_ADC_SAMPLINGTIME_24CYCLES_5},
+    {LL_ADC_CLOCK_ASYNC_DIV16, LL_ADC_SAMPLINGTIME_12CYCLES_5},
+    {LL_ADC_CLOCK_ASYNC_DIV6, LL_ADC_SAMPLINGTIME_47CYCLES_5},
+    {LL_ADC_CLOCK_ASYNC_DIV32, LL_ADC_SAMPLINGTIME_2CYCLES_5},
+    {LL_ADC_CLOCK_ASYNC_DIV12, LL_ADC_SAMPLINGTIME_24CYCLES_5},
+    {LL_ADC_CLOCK_ASYNC_DIV4, LL_ADC_SAMPLINGTIME_92CYCLES_5},
+    {LL_ADC_CLOCK_ASYNC_DIV8, LL_ADC_SAMPLINGTIME_47CYCLES_5},
+    {LL_ADC_CLOCK_ASYNC_DIV32, LL_ADC_SAMPLINGTIME_6CYCLES_5},
+    {LL_ADC_CLOCK_ASYNC_DIV2, LL_ADC_SAMPLINGTIME_247CYCLES_5},
+    {LL_ADC_CLOCK_ASYNC_DIV16, LL_ADC_SAMPLINGTIME_24CYCLES_5},
+    {LL_ADC_CLOCK_ASYNC_DIV10, LL_ADC_SAMPLINGTIME_47CYCLES_5},
+    {LL_ADC_CLOCK_ASYNC_DIV6, LL_ADC_SAMPLINGTIME_92CYCLES_5},
+    {LL_ADC_CLOCK_ASYNC_DIV32, LL_ADC_SAMPLINGTIME_12CYCLES_5},
+    {LL_ADC_CLOCK_ASYNC_DIV12, LL_ADC_SAMPLINGTIME_47CYCLES_5},
+    {LL_ADC_CLOCK_ASYNC_DIV8, LL_ADC_SAMPLINGTIME_92CYCLES_5},
+    {LL_ADC_CLOCK_ASYNC_DIV16, LL_ADC_SAMPLINGTIME_47CYCLES_5},
+    {LL_ADC_CLOCK_ASYNC_DIV10, LL_ADC_SAMPLINGTIME_92CYCLES_5},
+    {LL_ADC_CLOCK_ASYNC_DIV4, LL_ADC_SAMPLINGTIME_247CYCLES_5},
+    {LL_ADC_CLOCK_ASYNC_DIV32, LL_ADC_SAMPLINGTIME_24CYCLES_5},
+    {LL_ADC_CLOCK_ASYNC_DIV12, LL_ADC_SAMPLINGTIME_92CYCLES_5},
+    {LL_ADC_CLOCK_ASYNC_DIV6, LL_ADC_SAMPLINGTIME_247CYCLES_5},
+    {LL_ADC_CLOCK_ASYNC_DIV16, LL_ADC_SAMPLINGTIME_92CYCLES_5},
+    {LL_ADC_CLOCK_ASYNC_DIV32, LL_ADC_SAMPLINGTIME_47CYCLES_5},
+    {LL_ADC_CLOCK_ASYNC_DIV8, LL_ADC_SAMPLINGTIME_247CYCLES_5},
+    {LL_ADC_CLOCK_ASYNC_DIV10, LL_ADC_SAMPLINGTIME_247CYCLES_5},
+    {LL_ADC_CLOCK_ASYNC_DIV12, LL_ADC_SAMPLINGTIME_247CYCLES_5},
+    {LL_ADC_CLOCK_ASYNC_DIV32, LL_ADC_SAMPLINGTIME_92CYCLES_5},
+    {LL_ADC_CLOCK_ASYNC_DIV16, LL_ADC_SAMPLINGTIME_247CYCLES_5},
+    {LL_ADC_CLOCK_ASYNC_DIV32, LL_ADC_SAMPLINGTIME_247CYCLES_5}
 };
 
-uint32_t ADC_Prescaler = LL_ADC_CLOCK_ASYNC_DIV2;
-uint32_t ADC_SampleTime = LL_ADC_SAMPLINGTIME_2CYCLES_5;
-float ADC_MeasureTime = 0;
+typedef struct {
+    ADC_TypeDef *master;
+    uint32_t msChannel;
+    ADC_TypeDef *slave;
+    uint32_t slChannel;
+    DMA_TypeDef *dma;
+    uint32_t dmaChannel;
+    uint8_t *buffer;
+} ChannelParam;
+
+static const ChannelParam chParams[2] = {
+    {.master = ADC1, .msChannel = LL_ADC_CHANNEL_1, .slave = ADC2, .slChannel = LL_ADC_CHANNEL_3, .dma = DMA2, .dmaChannel = LL_DMA_CHANNEL_1, .buffer = samplesBuffer},
+    {.master = ADC3, .msChannel = LL_ADC_CHANNEL_1, .slave = ADC4, .slChannel = LL_ADC_CHANNEL_3, .dma = DMA1, .dmaChannel = LL_DMA_CHANNEL_3, .buffer = samplesBuffer1}
+};
+
 uint8_t ADC_param = 2;
+static uint32_t ADC_Prescaler = LL_ADC_CLOCK_ASYNC_DIV2;
+static uint32_t ADC_SampleTime = LL_ADC_SAMPLINGTIME_2CYCLES_5;
+float ADC_MeasureTime = 0;
 
 uint16_t ScreenTime = 0; // index in ScreenTimes
 uint16_t ScreenTime_adj = 0; // 0-9 shift in ScreenTime
@@ -98,12 +111,12 @@ uint32_t ADCStartTick; // time when start ADC buffer fill
 uint32_t ADCHalfElapsedTick; // the last time half buffer fill
 uint32_t ADCElapsedTick; // the last time buffer fill
 
-static void stopCH(void);
-static void ADC2_Init(void);
-static void ADC1_Init(void);
+static void initCH(uint8_t);
+static void startCH(uint8_t);
+static void stopCH(uint8_t);
+static void initMaster(uint8_t);
+static void initSlave(uint8_t);
 static float ADC_calcSampleTime();
-static void initCH();
-static void startCH();
 
 
 void ADC_start() {
@@ -112,80 +125,90 @@ void ADC_start() {
     }
     ADCworks = 1;
 
-    stopCH();
-    LL_DMA_DisableChannel(DMA2, LL_DMA_CHANNEL_1);
-    LL_mDelay(1);
+    ADC_Prescaler = ADC_Parameters[ADC_param].ADC_Prescaler;
+    ADC_SampleTime = ADC_Parameters[ADC_param].ADC_SampleCycles;
+    ADC_MeasureTime = ADC_calcSampleTime();
 
-    initCH();
-    startCH();
+    stopCH(0);
+    LL_DMA_DisableChannel(DMA2, LL_DMA_CHANNEL_1);
+    DWT_Delay_tics(10);
+
+    initCH(0);
+    startCH(0);
+
+    stopCH(1);
+    LL_DMA_DisableChannel(DMA1, LL_DMA_CHANNEL_3);
+    DWT_Delay_tics(10);
+
+    initCH(1);
+    startCH(1);
 
     ADCStartTick = DWT_Get_Current_Tick();
 }
 
-static void initCH() {
-    ADC1_Init();
-    ADC2_Init();
+static void initCH(const uint8_t ch) {
+    initMaster(ch);
+    initSlave(ch);
 }
 
-static void startCH() {
-    LL_ADC_ClearFlag_ADRDY(ADC2);
-    LL_ADC_Enable(ADC2);
-    LL_ADC_ClearFlag_ADRDY(ADC1);
-    LL_ADC_Enable(ADC1);
-    while (!LL_ADC_IsActiveFlag_ADRDY(ADC2)) {}
-    LL_ADC_ClearFlag_ADRDY(ADC2);
-    while (!LL_ADC_IsActiveFlag_ADRDY(ADC1)) {}
-    LL_ADC_ClearFlag_ADRDY(ADC1);
+static void startCH(const uint8_t ch) {
+    LL_ADC_ClearFlag_ADRDY(chParams[ch].slave);
+    LL_ADC_Enable(chParams[ch].slave);
+    LL_ADC_ClearFlag_ADRDY(chParams[ch].master);
+    LL_ADC_Enable(chParams[ch].master);
+    while (!LL_ADC_IsActiveFlag_ADRDY(chParams[ch].slave)) {}
+    LL_ADC_ClearFlag_ADRDY(chParams[ch].slave);
+    while (!LL_ADC_IsActiveFlag_ADRDY(chParams[ch].master)) {}
+    LL_ADC_ClearFlag_ADRDY(chParams[ch].master);
 
     // Set DMA transfer addresses of source and destination
-    LL_DMA_ConfigAddresses(DMA2, LL_DMA_CHANNEL_1,
-                           (uint32_t) &(ADC12_COMMON->CDR),
-                           (uint32_t) &samplesBuffer,
+    LL_DMA_ConfigAddresses(chParams[ch].dma, chParams[ch].dmaChannel,
+                           (uint32_t) &(__LL_ADC_COMMON_INSTANCE(chParams[ch].master)->CDR),
+                           (uint32_t) chParams[ch].buffer,
                            LL_DMA_DIRECTION_PERIPH_TO_MEMORY);
     // Set DMA transfer size
-    LL_DMA_SetDataLength(DMA2, LL_DMA_CHANNEL_1, BUF_SIZE / 2);
+    LL_DMA_SetDataLength(chParams[ch].dma, chParams[ch].dmaChannel, BUF_SIZE / 2);
     // Enable DMA transfer interruption: transfer complete & error
-    LL_DMA_EnableIT_TC(DMA2, LL_DMA_CHANNEL_1);
-    LL_DMA_EnableIT_TE(DMA2, LL_DMA_CHANNEL_1);
-    LL_DMA_EnableChannel(DMA2, LL_DMA_CHANNEL_1);
+    LL_DMA_EnableIT_TC(chParams[ch].dma, chParams[ch].dmaChannel);
+    LL_DMA_EnableIT_TE(chParams[ch].dma, chParams[ch].dmaChannel);
+    LL_DMA_EnableChannel(chParams[ch].dma, chParams[ch].dmaChannel);
 
-    LL_ADC_REG_StartConversion(ADC1);
+    LL_ADC_REG_StartConversion(chParams[ch].master);
 }
 
-static void stopCH() {
-    LL_ADC_REG_StopConversion(ADC1);
-    while (LL_ADC_REG_IsConversionOngoing(ADC1)) {}
-    LL_ADC_ClearFlag_EOS(ADC1);
+static void stopCH(const uint8_t ch) {
+    LL_ADC_REG_StopConversion(chParams[ch].master);
+    while (LL_ADC_REG_IsConversionOngoing(chParams[ch].master)) {}
+    LL_ADC_ClearFlag_EOS(chParams[ch].master);
 
-    if (LL_ADC_IsEnabled(ADC1)) {
-        LL_ADC_Disable(ADC1);
-        // while (LL_ADC_IsDisableOngoing(ADC1)) {}
-        while (LL_ADC_IsEnabled(ADC1)) {}
+    if (LL_ADC_IsEnabled(chParams[ch].master)) {
+        LL_ADC_Disable(chParams[ch].master);
+        while (LL_ADC_IsEnabled(chParams[ch].master)) {}
     }
 
-    if (LL_ADC_IsEnabled(ADC2)) {
-        LL_ADC_Disable(ADC2);
-        // while (LL_ADC_IsDisableOngoing(ADC2)) {}
-        while (LL_ADC_IsEnabled(ADC2)) {}
+    if (LL_ADC_IsEnabled(chParams[ch].slave)) {
+        LL_ADC_Disable(chParams[ch].slave);
+        while (LL_ADC_IsEnabled(chParams[ch].slave)) {}
     }
 }
 
-static void ADC1_Init(void) {
+#define DMAMUX_REQ(__ADCx__)  (((__ADCx__) == ADC1) ? (LL_DMAMUX_REQ_ADC1) : (LL_DMAMUX_REQ_ADC3))
+
+static void initMaster(const uint8_t ch) {
     LL_ADC_REG_InitTypeDef ADC_REG_InitStruct = {0};
     LL_ADC_CommonInitTypeDef ADC_CommonInitStruct = {0};
 
     // DMA Init
-    LL_DMA_SetPeriphRequest(DMA2, LL_DMA_CHANNEL_1, LL_DMAMUX_REQ_ADC1);
-    LL_DMA_SetDataTransferDirection(DMA2, LL_DMA_CHANNEL_1, LL_DMA_DIRECTION_PERIPH_TO_MEMORY);
-    LL_DMA_SetChannelPriorityLevel(DMA2, LL_DMA_CHANNEL_1, LL_DMA_PRIORITY_VERYHIGH);
-    LL_DMA_SetMode(DMA2, LL_DMA_CHANNEL_1, LL_DMA_MODE_NORMAL);
-    LL_DMA_SetPeriphIncMode(DMA2, LL_DMA_CHANNEL_1, LL_DMA_PERIPH_NOINCREMENT);
-    LL_DMA_SetMemoryIncMode(DMA2, LL_DMA_CHANNEL_1, LL_DMA_MEMORY_INCREMENT);
-    LL_DMA_SetPeriphSize(DMA2, LL_DMA_CHANNEL_1, LL_DMA_PDATAALIGN_HALFWORD);
-    LL_DMA_SetMemorySize(DMA2, LL_DMA_CHANNEL_1, LL_DMA_MDATAALIGN_HALFWORD);
+    LL_DMA_SetPeriphRequest(chParams[ch].dma, chParams[ch].dmaChannel, DMAMUX_REQ(chParams[ch].master));
+    LL_DMA_SetDataTransferDirection(chParams[ch].dma, chParams[ch].dmaChannel, LL_DMA_DIRECTION_PERIPH_TO_MEMORY);
+    LL_DMA_SetChannelPriorityLevel(chParams[ch].dma, chParams[ch].dmaChannel, LL_DMA_PRIORITY_VERYHIGH);
+    LL_DMA_SetMode(chParams[ch].dma, chParams[ch].dmaChannel, LL_DMA_MODE_NORMAL);
+    LL_DMA_SetPeriphIncMode(chParams[ch].dma, chParams[ch].dmaChannel, LL_DMA_PERIPH_NOINCREMENT);
+    LL_DMA_SetMemoryIncMode(chParams[ch].dma, chParams[ch].dmaChannel, LL_DMA_MEMORY_INCREMENT);
+    LL_DMA_SetPeriphSize(chParams[ch].dma, chParams[ch].dmaChannel, LL_DMA_PDATAALIGN_HALFWORD);
+    LL_DMA_SetMemorySize(chParams[ch].dma, chParams[ch].dmaChannel, LL_DMA_MDATAALIGN_HALFWORD);
 
-    // ADC1 init
-    MODIFY_REG(ADC1->CFGR, ADC_CFGR_RES | ADC_CFGR_ALIGN | ADC_CFGR_AUTDLY,
+    MODIFY_REG(chParams[ch].master->CFGR, ADC_CFGR_RES | ADC_CFGR_ALIGN | ADC_CFGR_AUTDLY,
                LL_ADC_RESOLUTION_8B | LL_ADC_DATA_ALIGN_RIGHT | LL_ADC_LP_MODE_NONE);
 
     ADC_REG_InitStruct.TriggerSource = LL_ADC_REG_TRIG_SOFTWARE;
@@ -194,28 +217,28 @@ static void ADC1_Init(void) {
     ADC_REG_InitStruct.ContinuousMode = LL_ADC_REG_CONV_CONTINUOUS;
     ADC_REG_InitStruct.DMATransfer = LL_ADC_REG_DMA_TRANSFER_LIMITED;
     ADC_REG_InitStruct.Overrun = LL_ADC_REG_OVR_DATA_PRESERVED;
-    LL_ADC_REG_Init(ADC1, &ADC_REG_InitStruct);
-    LL_ADC_SetGainCompensation(ADC1, 0);
-    LL_ADC_SetOverSamplingScope(ADC1, LL_ADC_OVS_DISABLE);
+    LL_ADC_REG_Init(chParams[ch].master, &ADC_REG_InitStruct);
+    LL_ADC_SetGainCompensation(chParams[ch].master, 0);
+    LL_ADC_SetOverSamplingScope(chParams[ch].master, LL_ADC_OVS_DISABLE);
 
     // Common config
     ADC_CommonInitStruct.CommonClock = ADC_Prescaler;
     ADC_CommonInitStruct.Multimode = LL_ADC_MULTI_DUAL_REG_INTERL;
     ADC_CommonInitStruct.MultiDMATransfer = LL_ADC_MULTI_REG_DMA_UNLMT_RES8_6B;
     ADC_CommonInitStruct.MultiTwoSamplingDelay = LL_ADC_MULTI_TWOSMP_DELAY_2CYCLES; // TODO
-    LL_ADC_CommonInit(__LL_ADC_COMMON_INSTANCE(ADC1), &ADC_CommonInitStruct);
-    CLEAR_BIT(ADC12_COMMON->CCR, ADC_CCR_DMACFG); // cube ll bug
+    LL_ADC_CommonInit(__LL_ADC_COMMON_INSTANCE(chParams[ch].master), &ADC_CommonInitStruct);
+    CLEAR_BIT(__LL_ADC_COMMON_INSTANCE(chParams[ch].master)->CCR, ADC_CCR_DMACFG); // cube ll bug
 
     // Configure Regular Channel
-    LL_ADC_REG_SetSequencerRanks(ADC1, LL_ADC_REG_RANK_1, LL_ADC_CHANNEL_1);
-    LL_ADC_SetChannelSamplingTime(ADC1, LL_ADC_CHANNEL_1, ADC_SampleTime);
-    LL_ADC_SetChannelSingleDiff(ADC1, LL_ADC_CHANNEL_1, LL_ADC_SINGLE_ENDED);
+    LL_ADC_REG_SetSequencerRanks(chParams[ch].master, LL_ADC_REG_RANK_1, chParams[ch].msChannel);
+    LL_ADC_SetChannelSamplingTime(chParams[ch].master, chParams[ch].msChannel, ADC_SampleTime);
+    LL_ADC_SetChannelSingleDiff(chParams[ch].master, chParams[ch].msChannel, LL_ADC_SINGLE_ENDED);
 }
 
-static void ADC2_Init(void) {
+static void initSlave(const uint8_t ch) {
     LL_ADC_REG_InitTypeDef ADC_REG_InitStruct = {0};
 
-    MODIFY_REG(ADC2->CFGR, ADC_CFGR_RES | ADC_CFGR_ALIGN | ADC_CFGR_AUTDLY,
+    MODIFY_REG(chParams[ch].slave->CFGR, ADC_CFGR_RES | ADC_CFGR_ALIGN | ADC_CFGR_AUTDLY,
                LL_ADC_RESOLUTION_8B | LL_ADC_DATA_ALIGN_RIGHT | LL_ADC_LP_MODE_NONE);
 
     ADC_REG_InitStruct.TriggerSource = LL_ADC_REG_TRIG_SOFTWARE;
@@ -224,27 +247,24 @@ static void ADC2_Init(void) {
     ADC_REG_InitStruct.ContinuousMode = LL_ADC_REG_CONV_CONTINUOUS;
     ADC_REG_InitStruct.DMATransfer = LL_ADC_REG_DMA_TRANSFER_NONE;
     ADC_REG_InitStruct.Overrun = LL_ADC_REG_OVR_DATA_PRESERVED;
-    LL_ADC_REG_Init(ADC2, &ADC_REG_InitStruct);
-    LL_ADC_SetGainCompensation(ADC2, 0);
-    LL_ADC_SetOverSamplingScope(ADC2, LL_ADC_OVS_DISABLE);
+    LL_ADC_REG_Init(chParams[ch].slave, &ADC_REG_InitStruct);
+    LL_ADC_SetGainCompensation(chParams[ch].slave, 0);
+    LL_ADC_SetOverSamplingScope(chParams[ch].slave, LL_ADC_OVS_DISABLE);
 
     // Configure Regular Channel
-    LL_ADC_REG_SetSequencerRanks(ADC2, LL_ADC_REG_RANK_1, LL_ADC_CHANNEL_3);
-    LL_ADC_SetChannelSamplingTime(ADC2, LL_ADC_CHANNEL_3, ADC_SampleTime);
-    LL_ADC_SetChannelSingleDiff(ADC2, LL_ADC_CHANNEL_3, LL_ADC_SINGLE_ENDED);
+    LL_ADC_REG_SetSequencerRanks(chParams[ch].slave, LL_ADC_REG_RANK_1, chParams[ch].slChannel);
+    LL_ADC_SetChannelSamplingTime(chParams[ch].slave, chParams[ch].slChannel, ADC_SampleTime);
+    LL_ADC_SetChannelSingleDiff(chParams[ch].slave, chParams[ch].slChannel, LL_ADC_SINGLE_ENDED);
 }
 
 
-void ADC_step(int16_t step) {
+void ADC_step(const int16_t step) {
     if (step == 0) return;
     if (step > 0) {
         if (ADC_param < ADC_Parameters_Size - 1) ADC_param++;
     } else {
         if (ADC_param > 0) ADC_param--;
     }
-    ADC_Prescaler = ADC_Parameters[ADC_param].ADC_Prescaler;
-    ADC_SampleTime = ADC_Parameters[ADC_param].ADC_SampleCycles;
-    ADC_MeasureTime = ADC_calcSampleTime();
 }
 
 // Sample time (ns)

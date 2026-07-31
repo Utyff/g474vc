@@ -471,7 +471,8 @@ static void MX_ADC3_Init(void)
   LL_ADC_SetChannelSamplingTime(ADC3, LL_ADC_CHANNEL_1, LL_ADC_SAMPLINGTIME_2CYCLES_5);
   LL_ADC_SetChannelSingleDiff(ADC3, LL_ADC_CHANNEL_1, LL_ADC_SINGLE_ENDED);
   /* USER CODE BEGIN ADC3_Init 2 */
-
+  LL_ADC_StartCalibration(ADC3, LL_ADC_SINGLE_ENDED);
+  while (LL_ADC_IsCalibrationOnGoing(ADC3) != 0) {}
   /* USER CODE END ADC3_Init 2 */
 
 }
@@ -549,7 +550,8 @@ static void MX_ADC4_Init(void)
   LL_ADC_SetChannelSamplingTime(ADC4, LL_ADC_CHANNEL_3, LL_ADC_SAMPLINGTIME_2CYCLES_5);
   LL_ADC_SetChannelSingleDiff(ADC4, LL_ADC_CHANNEL_3, LL_ADC_SINGLE_ENDED);
   /* USER CODE BEGIN ADC4_Init 2 */
-
+  LL_ADC_StartCalibration(ADC4, LL_ADC_SINGLE_ENDED);
+  while (LL_ADC_IsCalibrationOnGoing(ADC4) != 0) {}
   /* USER CODE END ADC4_Init 2 */
 
 }

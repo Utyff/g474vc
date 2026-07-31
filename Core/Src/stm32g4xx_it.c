@@ -271,7 +271,26 @@ void DMA1_Channel3_IRQHandler(void)
 
   /* USER CODE END DMA1_Channel3_IRQn 0 */
   /* USER CODE BEGIN DMA1_Channel3_IRQn 1 */
+  static uint32_t cntDMA1_3C = 0;
+  static uint32_t cntDMA1_3H = 0;
+  static uint32_t cntDMA1_3E = 0;
+  static uint32_t cntDMA1_3O = 0;
 
+  if (LL_DMA_IsActiveFlag_TC3(DMA1)) {
+    ADCworks = 0;
+    ADCElapsedTick = DWT_Get_Current_Tick() - ADCStartTick;
+    cntDMA1_3C++;
+    LL_DMA_ClearFlag_TC3(DMA1);
+  }
+  if (LL_DMA_IsActiveFlag_HT3(DMA1)) {
+    cntDMA1_3H++;
+    LL_DMA_ClearFlag_HT3(DMA1);
+  }
+  if (LL_DMA_IsActiveFlag_TE3(DMA1)) {
+    cntDMA1_3E++;
+    LL_DMA_ClearFlag_TE3(DMA1);
+  }
+  cntDMA1_3O++;
   /* USER CODE END DMA1_Channel3_IRQn 1 */
 }
 
