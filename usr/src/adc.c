@@ -98,10 +98,12 @@ uint32_t ADCStartTick; // time when start ADC buffer fill
 uint32_t ADCHalfElapsedTick; // the last time half buffer fill
 uint32_t ADCElapsedTick; // the last time buffer fill
 
-static void ADC_stop(void);
+static void stopCH(void);
 static void ADC2_Init(void);
 static void ADC1_Init(void);
 static float ADC_calcSampleTime();
+static void initCH();
+static void startCH();
 
 
 void ADC_start() {
@@ -110,13 +112,22 @@ void ADC_start() {
     }
     ADCworks = 1;
 
-    ADC_stop();
+    stopCH();
     LL_DMA_DisableChannel(DMA2, LL_DMA_CHANNEL_1);
     LL_mDelay(1);
 
+    initCH();
+    startCH();
+
+    ADCStartTick = DWT_Get_Current_Tick();
+}
+
+static void initCH() {
     ADC1_Init();
     ADC2_Init();
+}
 
+static void startCH() {
     LL_ADC_ClearFlag_ADRDY(ADC2);
     LL_ADC_Enable(ADC2);
     LL_ADC_ClearFlag_ADRDY(ADC1);
@@ -139,11 +150,9 @@ void ADC_start() {
     LL_DMA_EnableChannel(DMA2, LL_DMA_CHANNEL_1);
 
     LL_ADC_REG_StartConversion(ADC1);
-
-    ADCStartTick = DWT_Get_Current_Tick();
 }
 
-static void ADC_stop() {
+static void stopCH() {
     LL_ADC_REG_StopConversion(ADC1);
     while (LL_ADC_REG_IsConversionOngoing(ADC1)) {}
     LL_ADC_ClearFlag_EOS(ADC1);
