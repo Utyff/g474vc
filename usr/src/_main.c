@@ -73,9 +73,10 @@ void mainCycle() {
     LCD_ShowxNum(80, LINE1_Y, tim1Freq, 8, 12, 0x0);
     LCD_ShowxNum(50, LINE2_Y, (u32) ADC_MeasureTime * FRAME_STEP, 7, 12, 0x0);
     LCD_ShowxNum(120, LINE2_Y, (u32) ADC_param, 5, 12, 0x0);
+    LCD_ShowxNum(200, LINE2_Y, (u32) autoreload, 5, 12, 0x0);
 
     POINT_COLOR = MAGENTA;
-    LCD_ShowxNum(200,  LINE2_Y, ADCElapsedTick, 10, 12, 0x0);
+    LCD_ShowxNum(280,  LINE2_Y, ADCElapsedTick, 10, 12, 0x0);
 
     delay_ms(30);
 }

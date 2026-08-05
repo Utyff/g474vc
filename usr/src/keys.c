@@ -2,15 +2,17 @@
 #include <_main.h>
 #include <keys.h>
 #include <adc.h>
-#include <string.h>
+#include "dac.h"
 #include <generator.h>
+
 
 #define DEBOUNCING_CNT 0
 #define MAX_ENCODER    255 // max encoder value
 #define MID_ENCODER    (MAX_ENCODER/2+1)
 #define ENCODER_STEP   2   // counts per step
 #define ENCODER_TIM    TIM8
-#define MAX_ACTIONS    2u
+#define MAX_ACTIONS    3u
+
 
 uint8_t button1Count = 0;
 uint8_t button2Count = 0;
@@ -75,7 +77,7 @@ void KEYS_scan() {
         ADC_step(step);
     } else if (action == 1) {
         GEN_step(step);
-    } /*else {
-        DAC_NextGeneratorSignal();
-    } //*/
+    } else {
+        DAC_step(step);
+    }
 }

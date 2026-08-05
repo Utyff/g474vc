@@ -160,6 +160,8 @@ static void startCH(const uint8_t ch) {
     LL_ADC_ClearFlag_ADRDY(chParams[ch].slave);
     while (!LL_ADC_IsActiveFlag_ADRDY(chParams[ch].master)) {}
     LL_ADC_ClearFlag_ADRDY(chParams[ch].master);
+    LL_ADC_ClearFlag_EOSMP(chParams[ch].master);
+    LL_ADC_ClearFlag_OVR(chParams[ch].master);
 
     // Set DMA transfer addresses of source and destination
     LL_DMA_ConfigAddresses(chParams[ch].dma, chParams[ch].dmaChannel,
@@ -169,6 +171,9 @@ static void startCH(const uint8_t ch) {
     // Set DMA transfer size
     LL_DMA_SetDataLength(chParams[ch].dma, chParams[ch].dmaChannel, BUF_SIZE / 2);
     // Enable DMA transfer interruption: transfer complete & error
+    LL_DMA_ClearFlag_TC3(DMA1);
+    LL_DMA_ClearFlag_HT3(DMA1);
+    LL_DMA_ClearFlag_TE3(DMA1);
     LL_DMA_EnableIT_TC(chParams[ch].dma, chParams[ch].dmaChannel);
     LL_DMA_EnableIT_TE(chParams[ch].dma, chParams[ch].dmaChannel);
     LL_DMA_EnableChannel(chParams[ch].dma, chParams[ch].dmaChannel);
@@ -180,6 +185,8 @@ static void stopCH(const uint8_t ch) {
     LL_ADC_REG_StopConversion(chParams[ch].master);
     while (LL_ADC_REG_IsConversionOngoing(chParams[ch].master)) {}
     LL_ADC_ClearFlag_EOS(chParams[ch].master);
+    LL_ADC_ClearFlag_EOSMP(chParams[ch].master);
+    LL_ADC_ClearFlag_OVR(chParams[ch].master);
 
     if (LL_ADC_IsEnabled(chParams[ch].master)) {
         LL_ADC_Disable(chParams[ch].master);

@@ -390,7 +390,7 @@ static void MX_ADC3_Init(void)
 
   LL_GPIO_InitTypeDef GPIO_InitStruct = {0};
 
-  LL_RCC_SetADCClockSource(LL_RCC_ADC345_CLKSOURCE_SYSCLK);
+  LL_RCC_SetADCClockSource(LL_RCC_ADC345_CLKSOURCE_PLL);
 
   /* Peripheral clock enable */
   LL_AHB2_GRP1_EnableClock(LL_AHB2_GRP1_PERIPH_ADC345);
@@ -494,7 +494,7 @@ static void MX_ADC4_Init(void)
 
   LL_GPIO_InitTypeDef GPIO_InitStruct = {0};
 
-  LL_RCC_SetADCClockSource(LL_RCC_ADC345_CLKSOURCE_SYSCLK);
+  LL_RCC_SetADCClockSource(LL_RCC_ADC345_CLKSOURCE_PLL);
 
   /* Peripheral clock enable */
   LL_AHB2_GRP1_EnableClock(LL_AHB2_GRP1_PERIPH_ADC345);
