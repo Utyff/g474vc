@@ -41,13 +41,13 @@ static const uint16_t sin32[] = {
  * TIM4 Configuration
  * CLK  - 170 mHz
  * APB2 - 170 mHz
- * PRE           2 + 1 => 56.66 mHz
- * COUNT PERIOD  10 + 1 => 5.1515 mHz
- * DAC table size 32 => 0.1609 mHz
- * MAX DAC timer ~ 5 mHz. Otherwise, a conflict occurs between the DMA DAC and the ADC.
+ * PRE           0 + 1 => 170 mHz
+ * COUNT PERIOD  22 + 1 => 7.3913 mHz
+ * DAC table size 32 => 0.2309 mHz
+ * MAX DAC1 timer ~ 7 mHz
  */
-static uint32_t prescaler = 2;
-uint32_t autoreload = 10;
+static uint32_t prescaler = 0;
+uint32_t autoreload = 22;
 
 
 static void DAC_Activate(void) {
