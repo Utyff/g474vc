@@ -46,7 +46,6 @@ static const uint16_t sin32[] = {
  * DAC table size 32 => 0.1609 mHz
  * MAX DAC timer ~ 5 mHz. Otherwise, a conflict occurs between the DMA DAC and the ADC.
  */
-static uint8_t sin32_2[32] = {};
 static uint32_t prescaler = 2;
 uint32_t autoreload = 10;
 
@@ -95,20 +94,17 @@ static void startTimer() {
 }
 
 void DAC_startSin() {
-    for (int i = 0; i < 16; i++) {
-        sin32_2[i] = (sin32[i+i] >> 4);
-    }
 
     startTimer();
 
     /*##-2- Enable DAC selected channel and associated DMA #############################*/
     /* Set DMA transfer addresses of source and destination */
     LL_DMA_ConfigAddresses(DMA1, LL_DMA_CHANNEL_2,
-                           (uint32_t) &sin32_2,
-                           LL_DAC_DMA_GetRegAddr(DAC1, LL_DAC_CHANNEL_1, LL_DAC_DMA_REG_DATA_8BITS_RIGHT_ALIGNED),
+                           (uint32_t) &sin32,
+                           LL_DAC_DMA_GetRegAddr(DAC1, LL_DAC_CHANNEL_1, LL_DAC_DMA_REG_DATA_12BITS_RIGHT_ALIGNED),
                            LL_DMA_DIRECTION_MEMORY_TO_PERIPH);
     /* Set DMA transfer size */
-    LL_DMA_SetDataLength(DMA1, LL_DMA_CHANNEL_2, 16);
+    LL_DMA_SetDataLength(DMA1, LL_DMA_CHANNEL_2, 32);
     LL_DMA_EnableChannel(DMA1, LL_DMA_CHANNEL_2);
 
     DAC_Activate();
