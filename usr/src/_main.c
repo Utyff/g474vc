@@ -55,7 +55,7 @@ void mainCycle() {
 
     if ((random() & 7) < 2) GPIOB->ODR ^= LED1_Pin;
     if ((random() & 7) < 2) GPIOB->ODR ^= LED2_Pin;
-    if ((random() & 7) < 2) GPIOB->ODR ^= LED3_Pin;
+    // if ((random() & 7) < 2) GPIOB->ODR ^= LED3_Pin;
     // getPoint(0, &touchPoint1);
     // getPoint(1, &touchPoint2);
 
@@ -98,13 +98,13 @@ void UART_Transmit(const char *msg) {
     LL_DMA_ConfigAddresses(DMA1,
                            LL_DMA_CHANNEL_1,
                            (uint32_t) txBuffer,
-                           (uint32_t) &(USART1->TDR),
+                           (uint32_t) &(DEBUG_UART->TDR),
                            LL_DMA_DIRECTION_MEMORY_TO_PERIPH);
     LL_DMA_SetDataLength(DMA1, LL_DMA_CHANNEL_1, txBufferSize);
 
     LL_DMA_EnableChannel(DMA1, LL_DMA_CHANNEL_1);
-    LL_USART_EnableDMAReq_TX(USART1);
-    LL_USART_EnableDirectionTx(USART1);
+    LL_USART_EnableDMAReq_TX(DEBUG_UART);
+    LL_USART_EnableDirectionTx(DEBUG_UART);
 }
 #endif
 

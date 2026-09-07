@@ -33,6 +33,7 @@ void SWO_Trace(uint8_t* msg);
 #include "string.h"
 void UART_Transmit(const char *msg);
 
+#define DEBUG_UART USART2
 #define DBG_Trace(msg) UART_Transmit(msg)
 
 #elif defined(DEBUG_TRACE_NONE)
