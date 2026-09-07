@@ -44,8 +44,9 @@ _Min_Stack_Size = 0x400; /* required amount of stack */
 /* Memories definition */
 MEMORY
 {
-  RAM    (xrw)    : ORIGIN = 0x20000000,   LENGTH = 128K
+  RAM     (xrw)    : ORIGIN = 0x20000000,  LENGTH = 128K
   FLASH    (rx)    : ORIGIN = 0x8000000,   LENGTH = 256K
+  QSPI     (rx)    : ORIGIN = 0x90000000,  LENGTH = 1024K
 }
 
 /* Sections */
@@ -101,6 +102,19 @@ SECTIONS
     __exidx_end = .;
     . = ALIGN(4);
   } >FLASH
+
+  _qspi_init_base = LOADADDR(.qspi);
+  _qspi_init_length = SIZEOF(.qspi);
+
+  .qspi :
+  {
+    . = ALIGN(4);
+    _qspi_start = .;    /* create a global symbol at qspi start */
+    *(.qspi)            /* .qspi sections */
+    *(.qspi*)           /* .qspi* sections */
+    . = ALIGN(4);
+    _qspi_end = .;      /* define a global symbols at end of qspi */
+  } >QSPI AT> FLASH
 
   .preinit_array (READONLY) : /* The "READONLY" keyword is only supported in GCC11 and later, remove it if using GCC10 or earlier. */
   {
