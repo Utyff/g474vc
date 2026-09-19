@@ -4,7 +4,6 @@
 
 
 void drawFrame() {
-    eraseGraph();
     POINT_COLOR = GRAY;  // Drawing pen color
     BACK_COLOR = CLR_BACKGROUND;
 
@@ -31,11 +30,12 @@ void drawFrame() {
 }
 
 void drawScreen() {
+    eraseAllGraph();
     drawFrame();
 
     u32 t0 = DWT_Get_Current_Tick();
 
-    drawGraph();
+    drawAllGraph();
 
     // count time for one circle
     u32 ticks = DWT_Elapsed_Tick(t0);

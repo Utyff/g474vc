@@ -93,7 +93,7 @@ typedef struct {
 } ChannelParam;
 
 static const ChannelParam chParams[2] = {
-    {.master = ADC1, .msChannel = LL_ADC_CHANNEL_1, .slave = ADC2, .slChannel = LL_ADC_CHANNEL_1, .dma = DMA2, .dmaChannel = LL_DMA_CHANNEL_1, .buffer = samplesBuffer},
+    {.master = ADC1, .msChannel = LL_ADC_CHANNEL_1, .slave = ADC2, .slChannel = LL_ADC_CHANNEL_1, .dma = DMA2, .dmaChannel = LL_DMA_CHANNEL_1, .buffer = samplesBuffer0},
     {.master = ADC3, .msChannel = LL_ADC_CHANNEL_1, .slave = ADC4, .slChannel = LL_ADC_CHANNEL_3, .dma = DMA1, .dmaChannel = LL_DMA_CHANNEL_3, .buffer = samplesBuffer1}
 };
 

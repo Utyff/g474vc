@@ -6,14 +6,14 @@
 
 
 extern float scaleX;
-extern uint8_t graph[];
+extern uint8_t graph0[];
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-void drawGraph();
-void eraseGraph();
+void drawAllGraph();
+void eraseAllGraph();
 
 #ifdef __cplusplus
 }

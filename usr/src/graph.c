@@ -8,7 +8,8 @@
  * Make and draw oscillogram
  */
 
-uint8_t graph[MAX_X];
+uint8_t graph0[MAX_X];
+uint8_t graph1[MAX_X];
 float scaleX = 1;  // no more than 1
 float scaleY = 0.94f;
 u8 trgLvl = 128;
@@ -42,12 +43,13 @@ uint32_t BuildGraphTick;
 /**
  * Build graph for 1 channels samples array
  */
-void buildGraph1ch() {
+static void buildGraph(uint8_t ch) {
     uint32_t t0 = DWT_Get_Current_Tick();
     int i, j;
     float x;
 
-    u8 *samples = samplesBuffer;
+    u8 *samples = ch==0 ? samplesBuffer0 : samplesBuffer1;
+    u8 *graph = ch==0 ? graph0 : graph1;
 //    if (firstHalf != 0) samples += BUF_SIZE / 2;
 
     x = 0;
@@ -58,45 +60,68 @@ void buildGraph1ch() {
         if ((int) x != j) {
             j = (int) x;
             if (j >= MAX_X) break;
-            graph[j] = val;
+            graph[j] = val /2;
         } else {
-            graph[j] = (graph[j] + val) >> 1; // arithmetical mean
+            graph[j] = ((graph[j] + val) >> 1) /2; // arithmetical mean
         }
         x += scaleX;
     }
     BuildGraphTick = DWT_Elapsed_Tick(t0);
 }
 
+void buildAllGraph() {
+    buildGraph(0);
+    buildGraph(1);
+}
+
 uint32_t DrawGraphTick;
 
-void drawGraph() {
+static void drawGraph(uint8_t *graph) {
     u8 prev;
+    u16 yShift = 0;
+    if (graph==graph1) {
+        yShift = MAX_Y/2;
+    }
 
-    buildGraph1ch();
     uint32_t t0 = DWT_Get_Current_Tick();
 
     prev = graph[0];
+    u16 color = graph == graph0 ? CLR_CH0 : CLR_CH1;
+
     for (u16 i = 1; i < MAX_X; i++) {
         //LCD_DrawLine(i - (u16) 1, prev, i, graph[i]);
-        LCD_Fill(i, prev, i, graph[i], CLR_CH1);
+        LCD_Fill(i, prev+yShift, i, graph[i]+yShift,  color);
         prev = graph[i];
     }
     LCD_Set_Window(0, 0, MAX_X - 1, MAX_Y - 1);
 
     DrawGraphTick = DWT_Elapsed_Tick(t0);
-//  LCD_ShowxNum(150,227, DrawGraphTick/168,  10,12, 9);
-//  LCD_ShowxNum(190,227, BuildGraphTick/168, 10,12, 9);
-} //*/
+}
 
-void eraseGraph() {
+void drawAllGraph() {
+    buildAllGraph();
+    drawGraph(graph0);
+    drawGraph(graph1);
+}
+
+static void eraseGraph(uint8_t *graph) {
     u8 prev;
+    u16 yShift = 0;
+    if (graph==graph1) {
+        yShift = MAX_Y/2;
+    }
 
     POINT_COLOR = BLACK;
     prev = graph[0];
     for (u16 i = 1; i < MAX_X; i++) {
         //LCD_DrawLine(i - (u16) 1, prev, i, graph[i]);
-        LCD_Fill(i, prev, i, graph[i], POINT_COLOR);
+        LCD_Fill(i, prev+yShift, i, graph[i]+yShift, POINT_COLOR);
         prev = graph[i];
     }
     LCD_Set_Window(0, 0, MAX_X - 1, MAX_Y - 1);
+}
+
+void eraseAllGraph() {
+    eraseGraph(graph0);
+    eraseGraph(graph1);
 }
