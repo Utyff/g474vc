@@ -93,7 +93,7 @@ typedef struct {
 } ChannelParam;
 
 static const ChannelParam chParams[2] = {
-    {.master = ADC1, .msChannel = LL_ADC_CHANNEL_1, .slave = ADC2, .slChannel = LL_ADC_CHANNEL_3, .dma = DMA2, .dmaChannel = LL_DMA_CHANNEL_1, .buffer = samplesBuffer},
+    {.master = ADC1, .msChannel = LL_ADC_CHANNEL_1, .slave = ADC2, .slChannel = LL_ADC_CHANNEL_1, .dma = DMA2, .dmaChannel = LL_DMA_CHANNEL_1, .buffer = samplesBuffer},
     {.master = ADC3, .msChannel = LL_ADC_CHANNEL_1, .slave = ADC4, .slChannel = LL_ADC_CHANNEL_3, .dma = DMA1, .dmaChannel = LL_DMA_CHANNEL_3, .buffer = samplesBuffer1}
 };
 
@@ -130,14 +130,14 @@ void ADC_start() {
     ADC_MeasureTime = ADC_calcSampleTime();
 
     stopCH(0);
-    LL_DMA_DisableChannel(DMA2, LL_DMA_CHANNEL_1);
+    LL_DMA_DisableChannel(chParams[0].dma, chParams[0].dmaChannel);
     DWT_Delay_tics(10);
 
     initCH(0);
     startCH(0);
 
     stopCH(1);
-    LL_DMA_DisableChannel(DMA1, LL_DMA_CHANNEL_3);
+    LL_DMA_DisableChannel(chParams[1].dma, chParams[1].dmaChannel);
     DWT_Delay_tics(10);
 
     initCH(1);
@@ -171,9 +171,9 @@ static void startCH(const uint8_t ch) {
     // Set DMA transfer size
     LL_DMA_SetDataLength(chParams[ch].dma, chParams[ch].dmaChannel, BUF_SIZE / 2);
     // Enable DMA transfer interruption: transfer complete & error
-    LL_DMA_ClearFlag_TC3(DMA1);
-    LL_DMA_ClearFlag_HT3(DMA1);
-    LL_DMA_ClearFlag_TE3(DMA1);
+    LL_DMA_ClearFlag_TC3(chParams[ch].dma);
+    LL_DMA_ClearFlag_HT3(chParams[ch].dma);
+    LL_DMA_ClearFlag_TE3(chParams[ch].dma);
     LL_DMA_EnableIT_TC(chParams[ch].dma, chParams[ch].dmaChannel);
     LL_DMA_EnableIT_TE(chParams[ch].dma, chParams[ch].dmaChannel);
     LL_DMA_EnableChannel(chParams[ch].dma, chParams[ch].dmaChannel);
@@ -199,14 +199,15 @@ static void stopCH(const uint8_t ch) {
     }
 }
 
-#define DMAMUX_REQ(__ADCx__)  (((__ADCx__) == ADC1) ? (LL_DMAMUX_REQ_ADC1) : (LL_DMAMUX_REQ_ADC3))
+// #define DMAMUX_REQ(__ADCx__)  (((__ADCx__) == ADC1) ? (LL_DMAMUX_REQ_ADC1) : (LL_DMAMUX_REQ_ADC3))
+#define DMAMUX_REQ(chNum)  (((chNum) == 0) ? (LL_DMAMUX_REQ_ADC1) : (LL_DMAMUX_REQ_ADC3))
 
 static void initMaster(const uint8_t ch) {
     LL_ADC_REG_InitTypeDef ADC_REG_InitStruct = {0};
     LL_ADC_CommonInitTypeDef ADC_CommonInitStruct = {0};
 
     // DMA Init
-    LL_DMA_SetPeriphRequest(chParams[ch].dma, chParams[ch].dmaChannel, DMAMUX_REQ(chParams[ch].master));
+    LL_DMA_SetPeriphRequest(chParams[ch].dma, chParams[ch].dmaChannel, DMAMUX_REQ(ch));
     LL_DMA_SetDataTransferDirection(chParams[ch].dma, chParams[ch].dmaChannel, LL_DMA_DIRECTION_PERIPH_TO_MEMORY);
     LL_DMA_SetChannelPriorityLevel(chParams[ch].dma, chParams[ch].dmaChannel, LL_DMA_PRIORITY_VERYHIGH);
     LL_DMA_SetMode(chParams[ch].dma, chParams[ch].dmaChannel, LL_DMA_MODE_NORMAL);
