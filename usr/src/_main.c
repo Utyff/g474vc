@@ -8,7 +8,7 @@
 #include <generator.h>
 #include <adc.h>
 #include <dac.h>
-#include "ft6x36.h"
+#include <ft6x36.h>
 
 
 void CORECheck();
@@ -21,8 +21,8 @@ extern float time;
 const char buildDate[] = __DATE__;
 const char buildTime[] = __TIME__;
 uint8_t DMA1_0_busy;
-// touch_point_t touchPoint1;
-// touch_point_t touchPoint2;
+touch_point_t touchPoint1;
+touch_point_t touchPoint2;
 
 
 void UART_start() {
@@ -56,8 +56,8 @@ void mainCycle() {
     if ((random() & 7) < 2) GPIOB->ODR ^= LED1_Pin;
     if ((random() & 7) < 2) GPIOB->ODR ^= LED2_Pin;
     // if ((random() & 7) < 2) GPIOB->ODR ^= LED3_Pin;
-    // getPoint(0, &touchPoint1);
-    // getPoint(1, &touchPoint2);
+    getPoint(0, &touchPoint1);
+    getPoint(1, &touchPoint2);
 
     if (ADCworks == 0) {
         drawScreen();
