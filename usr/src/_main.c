@@ -9,6 +9,7 @@
 #include <adc.h>
 #include <dac.h>
 #include <ft6x36.h>
+#include <eeprom.h>
 
 
 void CORECheck();
@@ -47,6 +48,7 @@ void mainInitialize() {
 
     GEN_setParams();
     DAC_startSin();
+    EEPROM_Test();
 }
 
 u32 ticks = 0;
