@@ -71,7 +71,7 @@ void KEYS_scan() {
         return;
     }
 
-    uint32_t st = (~SW5_GPIO_Port->IDR & SW5_Pin) >> 13; // 13 - pin number & BTN1
+    uint32_t st = (~SW5_GPIO_Port->IDR & SW5_Pin) >> 5;  // 5 - pin number & BTN1
     st |= (~SW2_GPIO_Port->IDR & SW2_Pin) << 1 ;         // 0 pin number & BTN2
     st |= (~SW3_GPIO_Port->IDR & SW3_Pin);               // 2 pin number & BTN3
     st |= (~SW4_GPIO_Port->IDR & SW4_Pin);               // 3 pin number & BTN4

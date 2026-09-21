@@ -132,7 +132,7 @@ void LCD_Display_Dir(u8 dir) {
     LCD_Scan_Dir(DFT_SCAN_DIR);    // Default scan direction
 }
 
-vu16 lid=0x1234;
+vu32 lid=0x1234;
 
 // Initialize lcd
 // This initialization function can initialize the various ILI93XX LCD, but the other function is based ILI9320!!!
@@ -150,7 +150,7 @@ void LCD_Init(void) {
     lcddev.id2 = LCD_RD_DATA();   // Read 0X00
     lcddev.id3 = LCD_RD_DATA();   // Read 77
     lcddev.id4 = LCD_RD_DATA();   // Read 96
-    lid = (lcddev.id3 << 8 | lcddev.id4);
+    lid = lcddev.id2 << 16 | lcddev.id3 << 8 | lcddev.id4;
 //        if (lid != 0X7796) {
 //            Error_Handler();
 //        }
