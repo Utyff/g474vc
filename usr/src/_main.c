@@ -10,6 +10,7 @@
 #include <dac.h>
 #include <ft6x36.h>
 #include <eeprom.h>
+#include <qspi.h>
 
 
 void CORECheck();
@@ -49,6 +50,22 @@ void mainInitialize() {
     GEN_setParams();
     DAC_startSin();
     EEPROM_Test();
+
+    QSPI_Init();
+    QSPI_Enable_QPI_Mode();
+    QSPI_GetStatus(1);
+
+    QSPI_Read_JEDEC_ID();
+    QSPI_Read_Manf_Device_ID(1);
+
+    // QSPI_ReadBlock(0x100, rxBuffer, 70);
+    // for (int i = 0; i < 256; i++) {
+    //   txData[i] = i;
+    // }
+    // txData[0] = 0xa5;
+    // QSPI_WritePage(0x100, txData, 64);
+    // QSPI_ReadBlock(0x100, rxBuffer2, 70);
+    QSPI_EnableMemoryMappedMode();
 }
 
 u32 ticks = 0;
