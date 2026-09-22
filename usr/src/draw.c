@@ -1,24 +1,27 @@
 #include <dwt.h>
-#include "draw.h"
-#include "graph.h"
+#include <lcd.h>
+#include <draw.h>
+#include <graph.h>
 
 
 void drawFrame() {
-    POINT_COLOR = GRAY;  // Drawing pen color
+    POINT_COLOR = GRAY; // Drawing pen color
     BACK_COLOR = CLR_BACKGROUND;
 
     u32 t0 = DWT_Get_Current_Tick();
 
-    for (u16 y = FRAME_STEP; y < MAX_Y; y += FRAME_STEP) {
-        if (y == 128) POINT_COLOR = GRAY;  // Drawing pen color
+    // horizontal lines
+    for (u16 y = FRAME_STEP + BOTTOM_LINE_HEIGHT; y < MAX_Y - TOP_LINE_HEIGHT; y += FRAME_STEP) {
+        if (y == MAX_Y / 2) POINT_COLOR = GRAY; // Drawing pen color
         else POINT_COLOR = DARKGRAY;
-        LCD_Fill(0, y, MAX_X-1, y, POINT_COLOR);
+        LCD_Fill(0, y, MAX_X - 1, y, POINT_COLOR);
     }
 
+    // vertical lines
     for (u16 x = FRAME_STEP; x < MAX_X; x += FRAME_STEP) {
-        if (x == 160) POINT_COLOR = GRAY;  // Drawing pen color
+        if (x == MAX_X / 2 + FRAME_STEP / 2) POINT_COLOR = GRAY; // Drawing pen color
         else POINT_COLOR = DARKGRAY;
-        LCD_Fill(x, 0, x, MAX_Y-1, POINT_COLOR);
+        LCD_Fill(x, TOP_LINE_HEIGHT, x, MAX_Y - BOTTOM_LINE_HEIGHT - 1, POINT_COLOR);
     }
 
     LCD_Set_Window(0, 0, MAX_X - 1, MAX_Y - 1);

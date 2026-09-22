@@ -2,7 +2,6 @@
 #define __GRAPH_H
 
 #include "_main.h"
-#include "lcd.h"
 
 
 extern float scaleX;

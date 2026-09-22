@@ -108,7 +108,6 @@ const float ScreenTimes[] = {100, 200, 500, 1000, 2000, 5000, 10000, 20000}; // 
 
 uint8_t ADCworks;
 uint32_t ADCStartTick; // time when start ADC buffer fill
-uint32_t ADCHalfElapsedTick; // the last time half buffer fill
 uint32_t ADCElapsedTick; // the last time buffer fill
 
 static void initCH(uint8_t);
