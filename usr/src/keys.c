@@ -2,7 +2,7 @@
 #include <_main.h>
 #include <keys.h>
 #include <adc.h>
-#include "dac.h"
+#include <dac.h>
 #include <generator.h>
 
 
@@ -71,12 +71,12 @@ void KEYS_scan() {
         return;
     }
 
-    uint32_t st = (~SW5_GPIO_Port->IDR & SW5_Pin) >> 5;  // 5 - pin number & BTN1
-    st |= (~SW2_GPIO_Port->IDR & SW2_Pin) << 1 ;         // 0 pin number & BTN2
-    st |= (~SW3_GPIO_Port->IDR & SW3_Pin);               // 2 pin number & BTN3
-    st |= (~SW4_GPIO_Port->IDR & SW4_Pin);               // 3 pin number & BTN4
-    st |= (~ENC1_GPIO_Port->IDR & ENC1_Pin) <<3;         // 1 pin number & BTN5
-    st |= (~ENC2_GPIO_Port->IDR & ENC2_Pin) <<1;         // 4 pin number & BTN6
+    uint32_t st = ~SW2_GPIO_Port->IDR & SW2_Pin;   // E0 pin number & BTN1
+    st |= ~ENC1_GPIO_Port->IDR & ENC1_Pin;         // E1 pin number & BTN2
+    st |= ~SW3_GPIO_Port->IDR  & SW3_Pin;          // E2 pin number & BTN3
+    st |= ~SW4_GPIO_Port->IDR  & SW4_Pin;          // E3 pin number & BTN4
+    st |= ~ENC2_GPIO_Port->IDR & ENC2_Pin;         // E4 pin number & BTN5
+    st |= ~SW5_GPIO_Port->IDR  & SW5_Pin;          // E5 pin number & BTN6
     // if button1 change state
     if (st != (btns_state & BUTTON1)) {
         debounceCnt = DEBOUNCING_CNT;

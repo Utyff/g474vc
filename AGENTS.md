@@ -236,14 +236,13 @@ int16_t ENC2_Get(); // Вернуть значение энкодера 2
 
 // Состояние кнопок
 extern uint16_t btns_state;   // битовая маска
-extern uint8_t  button1Count; // счётчик нажатий
 
-#define BUTTON1 0x01  // SW3 (PE2)
-#define BUTTON2 0x02  // SW2 (PE0)
-#define BUTTON3 0x04  // SW5 (PE5)
-#define BUTTON4 0x08  // SW4 (PE3)
-#define BUTTON5 0x10  // ENC1 (PE1)
-#define BUTTON6 0x20  // ENC2 (PE4)
+#define BUTTON1 0x01  // SW2  (PE0)
+#define BUTTON2 0x02  // ENC1 (PE1)
+#define BUTTON3 0x04  // SW3  (PE2)
+#define BUTTON4 0x08  // SW4  (PE3)
+#define BUTTON5 0x10  // ENC2 (PE4)
+#define BUTTON6 0x20  // SW5  (PE5)
 ```
 
 ### Тачскрин FT6x36
