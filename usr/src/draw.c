@@ -4,6 +4,9 @@
 #include <graph.h>
 
 
+static void drawTopLine();
+
+
 void drawFrame() {
     POINT_COLOR = GRAY; // Drawing pen color
     BACK_COLOR = CLR_BACKGROUND;
@@ -35,6 +38,7 @@ void drawFrame() {
 void drawScreen() {
     eraseAllGraph();
     drawFrame();
+    drawTopLine();
 
     u32 t0 = DWT_Get_Current_Tick();
 
@@ -44,4 +48,15 @@ void drawScreen() {
     u32 ticks = DWT_Elapsed_Tick(t0);
     POINT_COLOR = YELLOW;
     LCD_ShowxNum(170, LINE1_Y, ticks / DWT_IN_MICROSEC, 8, 12, 0);
+}
+
+static void drawTopLine() {
+    POINT_COLOR = WHITE; // Drawing pen color
+    BACK_COLOR = activeChannel == 0 ? BROWN : DARKGRAY;
+    LCD_ShowString(TOP_LINE_POSITION1, TOP_LINE_Y, 30, 60, 12, "CH1", 0);
+    BACK_COLOR = activeChannel == 0 ? DARKGRAY : BROWN;
+    LCD_ShowString(TOP_LINE_POSITION2, TOP_LINE_Y, 30, 60, 12, "CH2", 0);
+    BACK_COLOR = DARKGRAY;
+    LCD_ShowxNum(TOP_LINE_POSITION3, TOP_LINE_Y, ch1Shift, 5, 12, 0);
+    LCD_ShowxNum(TOP_LINE_POSITION4, TOP_LINE_Y, ch2Shift, 5, 12, 0);
 }
