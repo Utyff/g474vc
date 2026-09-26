@@ -58,13 +58,11 @@ uint32_t tim1Period;
 uint32_t tim1Pulse;
 uint32_t tim1Freq;
 
-uint16_t tim15ch1 = 40;
-uint16_t tim15ch2 = 40;
 
 // Start tim15 ch1 & ch2
 static void TIM15_init() {
-    LL_TIM_OC_SetCompareCH1(TIM15, tim15ch1);
-    LL_TIM_OC_SetCompareCH2(TIM15, tim15ch2);
+    LL_TIM_OC_SetCompareCH1(TIM15, ch1Shift);
+    LL_TIM_OC_SetCompareCH2(TIM15, ch2Shift);
     // Enable output channel 1
     LL_TIM_CC_EnableChannel(TIM15, LL_TIM_CHANNEL_CH1);
     LL_TIM_CC_EnableChannel(TIM15, LL_TIM_CHANNEL_CH2);
@@ -73,6 +71,11 @@ static void TIM15_init() {
     LL_TIM_EnableCounter(TIM15);
 }
 
+
+void setShift() {
+    LL_TIM_OC_SetCompareCH1(TIM15, ch1Shift);
+    LL_TIM_OC_SetCompareCH2(TIM15, ch2Shift);
+}
 
 void GEN_step(int16_t step) {
     char msg[200];

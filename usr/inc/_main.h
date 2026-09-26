@@ -17,6 +17,11 @@ typedef __IO uint8_t vu8;
 
 extern uint8_t DMA1_0_busy;
 
+// SETTINGS
+extern uint8_t activeChannel;
+extern uint16_t ch1Shift;
+extern uint16_t ch2Shift;
+
 void mainInitialize();
 
 void mainCycle();

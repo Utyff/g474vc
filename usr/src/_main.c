@@ -20,6 +20,12 @@ void FPUCheck();
 extern int ADC_param;
 extern float time;
 
+// SETTINGS
+uint8_t activeChannel = 0;
+uint16_t ch1Shift = 20;
+uint16_t ch2Shift = 50;
+
+
 const char buildDate[] = __DATE__;
 const char buildTime[] = __TIME__;
 uint8_t DMA1_0_busy;
