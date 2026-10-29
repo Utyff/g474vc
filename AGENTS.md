@@ -59,16 +59,9 @@ while (1) {
 
 ### 5. Типы данных
 
-Проект использует собственные алиасы типов:
-```c
-typedef int32_t  s32;   typedef int16_t  s16;   typedef int8_t  s8;
-typedef uint32_t u32;   typedef uint16_t u16;   typedef uint8_t u8;
-typedef __IO uint32_t vu32;  typedef __IO uint16_t vu16;  typedef __IO uint8_t vu8;
-```
-
 **Правила:**
-- Использовать `u8`, `u16`, `u32`, `s8`, `s16`, `s32` вместо стандартных
-- Для регистров периферии — `vu8`, `vu16`, `vu32`
+- Использовать `uint8_t`, `uint16_t`, `uint32_t`, `int8_t`, `int16_t`, `int32_t` вместо стандартных
+- Для регистров периферии использовать макрос __IO
 - Включать `_main.h` первым для доступа к типам
 
 ### 6. Отладочный вывод
@@ -118,6 +111,9 @@ g474vc/
 └── g474vc.ioc                  → STM32CubeMX проект
 ```
 
+- Не менять файлы в папке Drivers/
+- Файлы в папке Core/ генерируются STM32CubeMX. В них можно изменять только строки внутри блоков `/* USER CODE BEGIN */ /* USER CODE END */`
+- Не менять файлы usr/src/stm32g4xx_ll_fmc.c и usr/src/stm32g4xx_ll_usb.c. Это файлы LL драйверов для FMC и USB.
 ---
 
 ## Стиль кода
@@ -141,10 +137,10 @@ g474vc/
 ### Include порядок
 
 ```c
-#include "_main.h"       // Сначала собственные типы
-#include <stdlib.h>      // Системные заголовочные
-#include "module.h"      // Заголовочные проекта
+#include "_main.h"        // Сначала собственные типы
+#include <stdlib.h>       // Системные заголовочные
 #include "stm32_ll_xyz.h" // LL заголовочные
+#include "module.h"       // Заголовочные проекта
 ```
 
 ### Обработка ошибок
@@ -159,9 +155,10 @@ g474vc/
 
 ### Память
 
-- **SRAM:** 320 КБ (всего)
+- **SRAM:** 128 КБ (всего)
 - **Heap:** 512 байт (`0x200`)
 - **Stack:** 1 КБ (`0x400`)
+- **Flash:** 256 КБ
 - **Не использовать `malloc`/`free`** — память статическая
 - Буферы ADC — статические массивы (`samplesBuffer0`, `samplesBuffer1`)
 
